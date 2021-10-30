@@ -1,0 +1,31 @@
+title libentangle Signaling Protocol
+
+participant C1
+participant S
+participant C2
+
+C1 --> S: Application(community: cluster1, mac: 012)
+S --> C1: Rejection()
+
+C1 --> S: Application(community: cluster1, mac: 123)
+S --> C1: Acceptance()
+C1 --> S: Ready()
+
+C2 --> S: Application(community: cluster1, mac: 124)
+S --> C2: Acceptance()
+C2 --> S: Ready()
+
+S --> C1: Introduction(mac: 124)
+
+C1 --> S: Offer(mac: 124, payload: asdf)
+S --> C2: Offer(mac: 123, payload: asdf)
+C2 --> S: Answer(mac: 123, payload: asdf)
+S --> C1: Answer(mac: 124, payload: asdf)
+
+C1 --> S: Candidate(mac: 124, payload: asdf)
+S --> C2: Candidate(mac: 123, payload: asdf)
+C2 --> S: Candidate(mac: 123, payload: asdf)
+S --> C1: Candidate(mac: 124, payload: asdf)
+
+C1 --> S: Exited()
+S --> C2: Resignation(mac: 123)

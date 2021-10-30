@@ -87,3 +87,7 @@ func NewCandidate(mac string, payload []byte) *Candidate {
 func NewExited(mac string) *Exited {
 	return &Exited{Message: Message{OpcodeExited}, Mac: mac}
 }
+
+func NewResignation(mac string) *Resignation {
+	return &Resignation{Message: Message{OpcodeResignation}, Mac: mac}
+}

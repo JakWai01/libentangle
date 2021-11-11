@@ -160,51 +160,7 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, filen
 				cm.HandleIntroduction(conn, data, peerConnection)
 				break
 			case api.OpcodeOffer:
-				var offer api.Offer
-				if err := json.Unmarshal(data, &offer); err != nil {
-					log.Fatal(err)
-				}
-
-				partnerMac := offer.Mac
-
-				var offer_val webrtc.SessionDescription
-
-				if err := json.Unmarshal([]byte(offer.Payload), &offer_val); err != nil {
-					log.Fatal(err)
-				}
-
-				if err := peerConnection.SetRemoteDescription(offer_val); err != nil {
-					log.Fatal(err)
-				}
-
-				go func() {
-					for candidate := range candidates {
-						if err := peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate, SDPMid: refString("0"), SDPMLineIndex: refUint16(0)}); err != nil {
-							log.Fatal(err)
-						}
-					}
-				}()
-
-				answer_val, err := peerConnection.CreateAnswer(nil)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				err = peerConnection.SetLocalDescription(answer_val)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				data, err := json.Marshal(answer_val)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				if err := wsjson.Write(context.Background(), conn, api.NewAnswer(data, partnerMac)); err != nil {
-					log.Fatal(err)
-				}
-
-				wg.Done()
+				cm.HandleOffer(conn, data, peerConnection, &candidates, &wg)
 				break
 			case api.OpcodeAnswer:
 				var answer api.Answer

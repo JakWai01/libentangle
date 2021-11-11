@@ -25,26 +25,26 @@ var signalCmd = &cobra.Command{
 
 			log.Printf("signaling server listening on %v", addr)
 
-			communities := signaling.NewCommunitiesManager()
+			manager := signaling.NewCommunitiesManager()
 
 			signaler := signaling.NewSignalingServer(
 				func(application api.Application, conn *websocket.Conn) error {
-					return communities.HandleApplication(application, conn)
+					return manager.HandleApplication(application, conn)
 				},
 				func(ready api.Ready, conn *websocket.Conn) error {
-					return communities.HandleReady(ready, conn)
+					return manager.HandleReady(ready, conn)
 				},
 				func(offer api.Offer) error {
-					return communities.HandleOffer(offer)
+					return manager.HandleOffer(offer)
 				},
 				func(answer api.Answer) error {
-					return communities.HandleAnswer(answer)
+					return manager.HandleAnswer(answer)
 				},
 				func(candidate api.Candidate) error {
-					return communities.HandleCandidate(candidate)
+					return manager.HandleCandidate(candidate)
 				},
 				func(exited api.Exited) error {
-					return communities.HandleExited(exited)
+					return manager.HandleExited(exited)
 				},
 			)
 

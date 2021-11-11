@@ -21,10 +21,31 @@ var (
 	result []byte
 )
 
-type SignalingClient struct{}
+type SignalingClient struct {
+	onAcceptance   func(conn *websocket.Conn, uuid string) error
+	onIntroduction func(conn *websocket.Conn, data []byte, peerConnecton *webrtc.PeerConnection) error
+	onOffer        func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error
+	onAnswer       func(data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error
+	onCandidate    func(data []byte, candidates *chan string) error
+	onResignation  func() error
+}
 
-func NewSignalingClient() *SignalingClient {
-	return &SignalingClient{}
+func NewSignalingClient(
+	onAcceptance func(conn *websocket.Conn, uuid string) error,
+	onIntroduction func(conn *websocket.Conn, data []byte, peerConnecton *webrtc.PeerConnection) error,
+	onOffer func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error,
+	onAnswer func(data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error,
+	onCandidate func(data []byte, candidates *chan string) error,
+	onResignation func() error,
+) *SignalingClient {
+	return &SignalingClient{
+		onAcceptance:   onAcceptance,
+		onIntroduction: onIntroduction,
+		onOffer:        onOffer,
+		onAnswer:       onAnswer,
+		onCandidate:    onCandidate,
+		onResignation:  onResignation,
+	}
 }
 
 func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, filename string, file []byte) []byte {
@@ -34,7 +55,7 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, filen
 
 	uuid := uuid.NewString()
 
-	cm := ClientManager{}
+	// cm := ClientManager{}
 
 	wsAddress := "ws://" + laddrKey
 	conn, _, error := websocket.Dial(context.Background(), wsAddress, nil)
@@ -154,22 +175,28 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, filen
 			// Handle different message types
 			switch v.Opcode {
 			case api.OpcodeAcceptance:
-				cm.HandleAcceptance(conn, uuid)
+				// cm.HandleAcceptance(conn, uuid)
+				s.onAcceptance(conn, uuid)
 				break
 			case api.OpcodeIntroduction:
-				cm.HandleIntroduction(conn, data, peerConnection)
+				// cm.HandleIntroduction(conn, data, peerConnection)
+				s.onIntroduction(conn, data, peerConnection)
 				break
 			case api.OpcodeOffer:
-				cm.HandleOffer(conn, data, peerConnection, &candidates, &wg)
+				// cm.HandleOffer(conn, data, peerConnection, &candidates, &wg)
+				s.onOffer(conn, data, peerConnection, &candidates, &wg)
 				break
 			case api.OpcodeAnswer:
-				cm.HandleAnswer(data, peerConnection, &candidates, &wg)
+				// cm.HandleAnswer(data, peerConnection, &candidates, &wg)
+				s.onAnswer(data, peerConnection, &candidates, &wg)
 				break
 			case api.OpcodeCandidate:
-				cm.HandleCandidate(data, &candidates)
+				// cm.HandleCandidate(data, &candidates)
+				s.onCandidate(data, &candidates)
 				break
 			case api.OpcodeResignation:
-				cm.HandleResignation()
+				// cm.HandleResignation()
+				s.onResignation()
 			}
 		}
 	}()

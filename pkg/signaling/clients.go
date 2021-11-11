@@ -163,45 +163,13 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, filen
 				cm.HandleOffer(conn, data, peerConnection, &candidates, &wg)
 				break
 			case api.OpcodeAnswer:
-				var answer api.Answer
-				if err := json.Unmarshal(data, &answer); err != nil {
-					log.Fatal(err)
-				}
-
-				var answer_val webrtc.SessionDescription
-
-				if err := json.Unmarshal([]byte(answer.Payload), &answer_val); err != nil {
-					log.Fatal(err)
-				}
-
-				if err := peerConnection.SetRemoteDescription(answer_val); err != nil {
-					log.Fatal(err)
-				}
-
-				go func() {
-					for candidate := range candidates {
-						if err := peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate, SDPMid: refString("0"), SDPMLineIndex: refUint16(0)}); err != nil {
-							log.Fatal(err)
-						}
-					}
-				}()
-
-				wg.Done()
+				cm.HandleAnswer(data, peerConnection, &candidates, &wg)
 				break
 			case api.OpcodeCandidate:
-				fmt.Println("received Candidate")
-				var candidate api.Candidate
-				if err := json.Unmarshal(data, &candidate); err != nil {
-					log.Fatal(err)
-				}
-				fmt.Println(string(candidate.Payload))
-				go func() {
-					candidates <- string(candidate.Payload)
-				}()
-
+				cm.HandleCandidate(data, &candidates)
 				break
 			case api.OpcodeResignation:
-				exitClient <- struct{}{}
+				cm.HandleResignation()
 			}
 		}
 	}()

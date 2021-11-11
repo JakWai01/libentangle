@@ -3,6 +3,7 @@ package signaling
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"sync"
 
@@ -118,5 +119,51 @@ func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, peerConne
 	}
 
 	wg.Done()
+	return nil
+}
+
+func (m *ClientManager) HandleAnswer(data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error {
+	var answer api.Answer
+	if err := json.Unmarshal(data, &answer); err != nil {
+		log.Fatal(err)
+	}
+
+	var answer_val webrtc.SessionDescription
+
+	if err := json.Unmarshal([]byte(answer.Payload), &answer_val); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := peerConnection.SetRemoteDescription(answer_val); err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		for candidate := range *candidates {
+			if err := peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate, SDPMid: refString("0"), SDPMLineIndex: refUint16(0)}); err != nil {
+				log.Fatal(err)
+			}
+		}
+	}()
+
+	wg.Done()
+	return nil
+}
+
+func (m *ClientManager) HandleCandidate(data []byte, candidates *chan string) error {
+	fmt.Println("received Candidate")
+	var candidate api.Candidate
+	if err := json.Unmarshal(data, &candidate); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(candidate.Payload))
+	go func() {
+		*candidates <- string(candidate.Payload)
+	}()
+	return nil
+}
+
+func (m *ClientManager) HandleResignation() error {
+	exitClient <- struct{}{}
 	return nil
 }

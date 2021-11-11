@@ -10,7 +10,7 @@ import (
 	"nhooyr.io/websocket/wsjson"
 )
 
-type CommunitiesManager struct {
+type ServerManager struct {
 	lock sync.Mutex
 
 	communities map[string][]string
@@ -18,15 +18,15 @@ type CommunitiesManager struct {
 	connections map[string]websocket.Conn
 }
 
-func NewCommunitiesManager() *CommunitiesManager {
-	return &CommunitiesManager{
+func NewCommunitiesManager() *ServerManager {
+	return &ServerManager{
 		communities: map[string][]string{},
 		macs:        map[string]bool{},
 		connections: map[string]websocket.Conn{},
 	}
 }
 
-func (m *CommunitiesManager) HandleApplication(application api.Application, conn *websocket.Conn) error {
+func (m *ServerManager) HandleApplication(application api.Application, conn *websocket.Conn) error {
 	if _, ok := m.macs[application.Mac]; ok {
 		// Send rejection. That mac is already contained
 
@@ -71,7 +71,7 @@ func (m *CommunitiesManager) HandleApplication(application api.Application, conn
 	}
 }
 
-func (m *CommunitiesManager) HandleReady(ready api.Ready, conn *websocket.Conn) error {
+func (m *ServerManager) HandleReady(ready api.Ready, conn *websocket.Conn) error {
 	// If we receive ready, mark the sending person as ready and check if bot hare ready.
 	m.macs[ready.Mac] = true
 
@@ -93,7 +93,7 @@ func (m *CommunitiesManager) HandleReady(ready api.Ready, conn *websocket.Conn) 
 	return nil
 }
 
-func (m *CommunitiesManager) HandleOffer(offer api.Offer) error {
+func (m *ServerManager) HandleOffer(offer api.Offer) error {
 	// Get the connection of the receiver and send him the payload
 	receiver := m.connections[offer.Mac]
 
@@ -111,7 +111,7 @@ func (m *CommunitiesManager) HandleOffer(offer api.Offer) error {
 	return nil
 }
 
-func (m *CommunitiesManager) HandleAnswer(answer api.Answer) error {
+func (m *ServerManager) HandleAnswer(answer api.Answer) error {
 	// Get connection of the receiver and send him the payload
 	receiver := m.connections[answer.Mac]
 
@@ -128,7 +128,7 @@ func (m *CommunitiesManager) HandleAnswer(answer api.Answer) error {
 	return nil
 }
 
-func (m *CommunitiesManager) HandleCandidate(candidate api.Candidate) error {
+func (m *ServerManager) HandleCandidate(candidate api.Candidate) error {
 	community, err := m.getCommunity(candidate.Mac)
 	if err != nil {
 		log.Fatal(err)
@@ -144,7 +144,7 @@ func (m *CommunitiesManager) HandleCandidate(candidate api.Candidate) error {
 	return nil
 }
 
-func (m *CommunitiesManager) HandleExited(exited api.Exited) error {
+func (m *ServerManager) HandleExited(exited api.Exited) error {
 	var receiver websocket.Conn
 
 	// Get the other peer in the community

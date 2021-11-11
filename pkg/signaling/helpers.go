@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func (m *CommunitiesManager) getCommunity(mac string) (string, error) {
+func (m *ServerManager) getCommunity(mac string) (string, error) {
 	for key, element := range m.communities {
 		for i := 0; i < len(element); i++ {
 			if element[i] == mac {
@@ -45,7 +45,7 @@ func asSha256(o interface{}) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-func (m *CommunitiesManager) getSenderMac(receiverMac string, community string) string {
+func (m *ServerManager) getSenderMac(receiverMac string, community string) string {
 	if len(m.communities[community]) == 2 {
 		if receiverMac == m.communities[community][1] {
 			// The second one is sender

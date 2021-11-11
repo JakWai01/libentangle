@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"sync"
 
 	api "github.com/alphahorizon/libentangle/pkg/api/websockets/v1"
 	"github.com/pion/webrtc/v3"
@@ -68,5 +69,54 @@ func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, pe
 	if err := wsjson.Write(context.Background(), conn, api.NewOffer(data, partnerMac)); err != nil {
 		log.Fatal(err)
 	}
+	return nil
+}
+
+func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error {
+	var offer api.Offer
+	if err := json.Unmarshal(data, &offer); err != nil {
+		log.Fatal(err)
+	}
+
+	partnerMac := offer.Mac
+
+	var offer_val webrtc.SessionDescription
+
+	if err := json.Unmarshal([]byte(offer.Payload), &offer_val); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := peerConnection.SetRemoteDescription(offer_val); err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		for candidate := range *candidates {
+			if err := peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate, SDPMid: refString("0"), SDPMLineIndex: refUint16(0)}); err != nil {
+				log.Fatal(err)
+			}
+		}
+	}()
+
+	answer_val, err := peerConnection.CreateAnswer(nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = peerConnection.SetLocalDescription(answer_val)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	data, err = json.Marshal(answer_val)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := wsjson.Write(context.Background(), conn, api.NewAnswer(data, partnerMac)); err != nil {
+		log.Fatal(err)
+	}
+
+	wg.Done()
 	return nil
 }

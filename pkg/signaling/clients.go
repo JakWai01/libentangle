@@ -34,6 +34,8 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, filen
 
 	uuid := uuid.NewString()
 
+	cm := ClientManager{}
+
 	wsAddress := "ws://" + laddrKey
 	conn, _, error := websocket.Dial(context.Background(), wsAddress, nil)
 	if error != nil {
@@ -152,55 +154,10 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, filen
 			// Handle different message types
 			switch v.Opcode {
 			case api.OpcodeAcceptance:
-				if err := wsjson.Write(context.Background(), conn, api.NewReady(uuid)); err != nil {
-					log.Fatal(err)
-				}
+				cm.HandleAcceptance(conn, uuid)
 				break
 			case api.OpcodeIntroduction:
-				// Create DataChannel
-				sendChannel, err := peerConnection.CreateDataChannel("foo", nil)
-				if err != nil {
-					log.Fatal(err)
-				}
-				sendChannel.OnClose(func() {
-					log.Println("sendChannel has closed")
-				})
-				sendChannel.OnOpen(func() {
-					log.Println("sendChannel has opened")
-				})
-				sendChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
-					log.Printf("Message from DataChannel %s payload %s", sendChannel.Label(), string(msg.Data))
-
-					defer sendChannel.Close()
-
-					exitClient <- struct{}{}
-				})
-
-				var introduction api.Introduction
-				if err := json.Unmarshal(data, &introduction); err != nil {
-					log.Fatal(err)
-				}
-
-				partnerMac := introduction.Mac
-
-				offer, err := peerConnection.CreateOffer(nil)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				if err := peerConnection.SetLocalDescription(offer); err != nil {
-					log.Fatal(err)
-				}
-
-				data, err := json.Marshal(offer)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				if err := wsjson.Write(context.Background(), conn, api.NewOffer(data, partnerMac)); err != nil {
-					log.Fatal(err)
-				}
-
+				cm.HandleIntroduction(conn, data, peerConnection)
 				break
 			case api.OpcodeOffer:
 				var offer api.Offer

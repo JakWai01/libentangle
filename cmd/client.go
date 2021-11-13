@@ -8,7 +8,12 @@ import (
 	"github.com/alphahorizon/libentangle/pkg/signaling"
 	"github.com/pion/webrtc/v3"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"nhooyr.io/websocket"
+)
+
+const (
+	communityKey = "community"
 )
 
 var clientCmd = &cobra.Command{
@@ -43,7 +48,7 @@ var clientCmd = &cobra.Command{
 		)
 
 		go func() {
-			go client.HandleConn("localhost:9090", "test", "", []byte(""))
+			go client.HandleConn("localhost:9090", viper.GetString(communityKey))
 		}()
 
 		for {
@@ -55,4 +60,15 @@ var clientCmd = &cobra.Command{
 			}
 		}
 	},
+}
+
+func init() {
+	clientCmd.PersistentFlags().String(communityKey, "a", "Community to join")
+
+	// Bind env variables
+	if err := viper.BindPFlags(clientCmd.PersistentFlags()); err != nil {
+		log.Fatal("could not bind flags:", err)
+	}
+	viper.SetEnvPrefix("airdrip")
+	viper.AutomaticEnv()
 }

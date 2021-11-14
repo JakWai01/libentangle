@@ -116,6 +116,7 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byt
 				s.onOffer(conn, data, &candidates, &wg, uuid)
 				break
 			case api.OpcodeAnswer:
+				fmt.Println("got answer")
 				// cm.HandleAnswer(data, peerConnection, &candidates, &wg)
 				s.onAnswer(data, &candidates, &wg)
 				break

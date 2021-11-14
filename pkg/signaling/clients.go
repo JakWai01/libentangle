@@ -23,8 +23,8 @@ var (
 
 type SignalingClient struct {
 	onAcceptance   func(conn *websocket.Conn, uuid string) error
-	onIntroduction func(conn *websocket.Conn, data []byte, peerConnecton *webrtc.PeerConnection) error
-	onOffer        func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error
+	onIntroduction func(conn *websocket.Conn, data []byte, peerConnecton *webrtc.PeerConnection, uuid string) error
+	onOffer        func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup, uuid string) error
 	onAnswer       func(data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error
 	onCandidate    func(data []byte, candidates *chan string) error
 	onResignation  func() error
@@ -32,8 +32,8 @@ type SignalingClient struct {
 
 func NewSignalingClient(
 	onAcceptance func(conn *websocket.Conn, uuid string) error,
-	onIntroduction func(conn *websocket.Conn, data []byte, peerConnecton *webrtc.PeerConnection) error,
-	onOffer func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error,
+	onIntroduction func(conn *websocket.Conn, data []byte, peerConnecton *webrtc.PeerConnection, uuid string) error,
+	onOffer func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup, uuid string) error,
 	onAnswer func(data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error,
 	onCandidate func(data []byte, candidates *chan string) error,
 	onResignation func() error,
@@ -71,7 +71,7 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byt
 		},
 	}
 
-	// Create RTCPeerConnection
+	// Create RTCPeerConnection for each introduction we receive, not at this point. After done that, we can probably assign a mac to said peerConnection and get the corresponding receiver for a message.
 	var peerConnection, err = webrtc.NewPeerConnection(config)
 	if err != nil {
 		log.Fatal(err)
@@ -87,54 +87,9 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byt
 
 	candidates := make(chan string)
 
-	var candidatesMux sync.Mutex
-
-	// Introduce pending candidates. When a remote description is not set yet, the candidates will be cached
-	// until a later invocation of the function
-	pendingCandidates := make([]*webrtc.ICECandidate, 0)
-
 	// Set the handler for peer connection state
 	// This will notify you when the peer has connected/disconnected
 	go func() {
-		peerConnection.OnConnectionStateChange(func(s webrtc.PeerConnectionState) {
-			log.Printf("Peer Connection State has changed: %s\n", s.String())
-		})
-
-		// This triggers when WE have a candidate for the other peer, not the other way around
-		// This candidate key needs to be send to the other peer
-		peerConnection.OnICECandidate(func(i *webrtc.ICECandidate) {
-			fmt.Println("Candidate was generated!")
-			if i == nil {
-				return
-			} else {
-				// wg.Wait()
-				candidatesMux.Lock()
-				defer func() {
-					candidatesMux.Unlock()
-				}()
-
-				desc := peerConnection.RemoteDescription()
-
-				if desc == nil {
-					pendingCandidates = append(pendingCandidates, i)
-				} else if err := wsjson.Write(context.Background(), conn, api.NewCandidate(uuid, []byte(i.ToJSON().Candidate))); err != nil {
-					log.Fatal(err)
-				}
-			}
-
-		})
-
-		// Register data channel creation handling
-		peerConnection.OnDataChannel(func(d *webrtc.DataChannel) {
-			// Register channel opening handling
-			d.OnOpen(func() {
-				if sendErr := d.Send([]byte("Hello World!")); sendErr != nil {
-					log.Fatal(sendErr)
-				}
-			})
-
-		})
-
 		if err := wsjson.Write(context.Background(), conn, api.NewApplication(communityKey, uuid)); err != nil {
 			log.Fatal(err)
 		}
@@ -178,11 +133,11 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byt
 				break
 			case api.OpcodeIntroduction:
 				// cm.HandleIntroduction(conn, data, peerConnection)
-				s.onIntroduction(conn, data, peerConnection)
+				s.onIntroduction(conn, data, peerConnection, uuid)
 				break
 			case api.OpcodeOffer:
 				// cm.HandleOffer(conn, data, peerConnection, &candidates, &wg)
-				s.onOffer(conn, data, peerConnection, &candidates, &wg)
+				s.onOffer(conn, data, peerConnection, &candidates, &wg, uuid)
 				break
 			case api.OpcodeAnswer:
 				// cm.HandleAnswer(data, peerConnection, &candidates, &wg)

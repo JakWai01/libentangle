@@ -44,17 +44,3 @@ func asSha256(o interface{}) string {
 
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
-
-func (m *ServerManager) getSenderMac(receiverMac string, community string) string {
-	if len(m.communities[community]) == 2 {
-		if receiverMac == m.communities[community][1] {
-			// The second one is sender
-			return m.communities[community][0]
-		} else {
-			// First one
-			return m.communities[community][1]
-		}
-	} else {
-		return m.communities[community][1]
-	}
-}

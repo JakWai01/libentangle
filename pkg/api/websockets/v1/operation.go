@@ -26,20 +26,23 @@ type Introduction struct {
 
 type Offer struct {
 	Message
-	Payload []byte `json:"payload"`
-	Mac     string `json:"mac"`
+	Payload     []byte `json:"payload"`
+	SenderMac   string `json:"sender"`
+	ReceiverMac string `json:"receiver`
 }
 
 type Answer struct {
 	Message
-	Payload []byte `json:"payload"`
-	Mac     string `json:"mac"`
+	Payload     []byte `json:"payload"`
+	SenderMac   string `json:"sender"`
+	ReceiverMac string `json:"receiver"`
 }
 
 type Candidate struct {
 	Message
-	Payload []byte `json:"payload"`
-	Mac     string `json:"mac"`
+	Payload     []byte `json:"payload"`
+	SenderMac   string `json:"sender"`
+	ReceiverMac string `json:"receiver"`
 }
 
 type Exited struct {
@@ -72,16 +75,16 @@ func NewIntroduction(mac string) *Introduction {
 	return &Introduction{Message: Message{OpcodeIntroduction}, Mac: mac}
 }
 
-func NewOffer(payload []byte, mac string) *Offer {
-	return &Offer{Message: Message{OpcodeOffer}, Payload: payload, Mac: mac}
+func NewOffer(payload []byte, sender string, receiver string) *Offer {
+	return &Offer{Message: Message{OpcodeOffer}, Payload: payload, SenderMac: sender, ReceiverMac: receiver}
 }
 
-func NewAnswer(payload []byte, mac string) *Answer {
-	return &Answer{Message: Message{OpcodeAnswer}, Payload: payload, Mac: mac}
+func NewAnswer(payload []byte, sender string, receiver string) *Answer {
+	return &Answer{Message: Message{OpcodeAnswer}, Payload: payload, SenderMac: sender, ReceiverMac: receiver}
 }
 
-func NewCandidate(mac string, payload []byte) *Candidate {
-	return &Candidate{Message: Message{OpcodeCandidate}, Payload: payload, Mac: mac}
+func NewCandidate(payload []byte, sender string, receiver string) *Candidate {
+	return &Candidate{Message: Message{OpcodeCandidate}, Payload: payload, SenderMac: sender, ReceiverMac: receiver}
 }
 
 func NewExited(mac string) *Exited {

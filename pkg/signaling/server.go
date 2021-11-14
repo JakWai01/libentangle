@@ -10,6 +10,7 @@ import (
 	"nhooyr.io/websocket"
 )
 
+// TODO: modify the signaling protocol
 // The signaling protocol is located at /docs/signaling-protocol.txt
 
 type SignalingServer struct {

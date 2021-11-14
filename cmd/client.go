@@ -30,11 +30,11 @@ var clientCmd = &cobra.Command{
 			func(conn *websocket.Conn, uuid string) error {
 				return manager.HandleAcceptance(conn, uuid)
 			},
-			func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection) error {
-				return manager.HandleIntroduction(conn, data, peerConnection)
+			func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, uuid string) error {
+				return manager.HandleIntroduction(conn, data, peerConnection, uuid)
 			},
-			func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error {
-				return manager.HandleOffer(conn, data, peerConnection, candidates, wg)
+			func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup, uuid string) error {
+				return manager.HandleOffer(conn, data, peerConnection, candidates, wg, uuid)
 			},
 			func(data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error {
 				return manager.HandleAnswer(data, peerConnection, candidates, wg)

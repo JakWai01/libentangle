@@ -166,8 +166,20 @@ func (m *ClientManager) HandleCandidate(data []byte, candidates *chan string) er
 	}
 	fmt.Println(string(candidate.Payload))
 	go func() {
-		// *candidates <- string(candidate.Payload)
 		m.peers[candidate.SenderMac].candidates = append(m.peers[candidate.SenderMac].candidates, string(candidate.Payload))
+	}()
+
+	peerConnection, err := m.getPeerConnection(candidate.SenderMac)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		for _, candidate := range m.peers[candidate.SenderMac].candidates {
+			if err := peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate, SDPMid: refString("0"), SDPMLineIndex: refUint16(0)}); err != nil {
+				log.Fatal(err)
+			}
+		}
 	}()
 	return nil
 }
@@ -202,10 +214,15 @@ func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string
 	}
 
 	peerConnection.OnICECandidate(func(i *webrtc.ICECandidate) {
-		fmt.Println("Candidate was generated!")
 		if i == nil {
 			return
 		} else {
+			m.lock.Lock()
+			defer func() {
+				m.lock.Unlock()
+			}()
+
+			fmt.Println("Candidate was generated!")
 			if err := wsjson.Write(context.Background(), conn, api.NewCandidate([]byte(i.ToJSON().Candidate), uuid, mac)); err != nil {
 				log.Fatal(err)
 			}

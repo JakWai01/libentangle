@@ -48,11 +48,7 @@ func NewSignalingClient(
 }
 
 func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byte {
-	// The new arguments we pass
-
 	uuid := uuid.NewString()
-
-	// cm := ClientManager{}
 
 	wsAddress := "ws://" + laddrKey
 	conn, _, error := websocket.Dial(context.Background(), wsAddress, nil)
@@ -104,28 +100,21 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byt
 			// Handle different message types
 			switch v.Opcode {
 			case api.OpcodeAcceptance:
-				// cm.HandleAcceptance(conn, uuid)
 				s.onAcceptance(conn, uuid)
 				break
 			case api.OpcodeIntroduction:
-				// cm.HandleIntroduction(conn, data, peerConnection)
 				s.onIntroduction(conn, data, uuid)
 				break
 			case api.OpcodeOffer:
-				// cm.HandleOffer(conn, data, peerConnection, &candidates, &wg)
 				s.onOffer(conn, data, &candidates, &wg, uuid)
 				break
 			case api.OpcodeAnswer:
-				fmt.Println("got answer")
-				// cm.HandleAnswer(data, peerConnection, &candidates, &wg)
 				s.onAnswer(data, &candidates, &wg)
 				break
 			case api.OpcodeCandidate:
-				// cm.HandleCandidate(data, &candidates)
 				s.onCandidate(data, &candidates)
 				break
 			case api.OpcodeResignation:
-				// cm.HandleResignation()
 				s.onResignation()
 			}
 		}

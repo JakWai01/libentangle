@@ -85,7 +85,7 @@ func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, candidate
 		log.Fatal(err)
 	}
 
-	peerConnection, err := m.getPeerConnection(offer.SenderMac)
+	peerConnection, err := m.createPeer(offer.SenderMac, conn, uuid)
 	if err != nil {
 		log.Fatal(err)
 	}

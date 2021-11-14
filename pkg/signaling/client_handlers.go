@@ -38,7 +38,7 @@ func (m *ClientManager) HandleAcceptance(conn *websocket.Conn, uuid string) erro
 	return nil
 }
 
-func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, uuid string) error {
+func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, uuid string) error {
 	var introduction api.Introduction
 	if err := json.Unmarshal(data, &introduction); err != nil {
 		log.Fatal(err)
@@ -73,7 +73,7 @@ func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, pe
 	return nil
 }
 
-func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup, uuid string) error {
+func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, candidates *chan string, wg *sync.WaitGroup, uuid string) error {
 	var offer api.Offer
 	if err := json.Unmarshal(data, &offer); err != nil {
 		log.Fatal(err)
@@ -82,6 +82,11 @@ func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, peerConne
 	var offer_val webrtc.SessionDescription
 
 	if err := json.Unmarshal([]byte(offer.Payload), &offer_val); err != nil {
+		log.Fatal(err)
+	}
+
+	peerConnection, err := m.getPeerConnection(offer.SenderMac)
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -120,7 +125,7 @@ func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, peerConne
 	return nil
 }
 
-func (m *ClientManager) HandleAnswer(data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error {
+func (m *ClientManager) HandleAnswer(data []byte, candidates *chan string, wg *sync.WaitGroup) error {
 	var answer api.Answer
 	if err := json.Unmarshal(data, &answer); err != nil {
 		log.Fatal(err)
@@ -129,6 +134,11 @@ func (m *ClientManager) HandleAnswer(data []byte, peerConnection *webrtc.PeerCon
 	var answer_val webrtc.SessionDescription
 
 	if err := json.Unmarshal([]byte(answer.Payload), &answer_val); err != nil {
+		log.Fatal(err)
+	}
+
+	peerConnection, err := m.getPeerConnection(answer.SenderMac)
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -204,15 +214,12 @@ func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string
 	})
 
 	// Register data channel creation handling
-	// This needs to be another function and not send a message onDataChannel
 	peerConnection.OnDataChannel(func(d *webrtc.DataChannel) {
-		// Register channel opening handling
 		d.OnOpen(func() {
 			if sendErr := d.Send([]byte("Hello World!")); sendErr != nil {
 				log.Fatal(sendErr)
 			}
 		})
-
 	})
 
 	return peerConnection, nil
@@ -238,4 +245,8 @@ func (m *ClientManager) createDataChannel(mac string, peerConnection *webrtc.Pee
 	})
 
 	return nil
+}
+
+func (m *ClientManager) getPeerConnection(mac string) (*webrtc.PeerConnection, error) {
+	return m.peers[mac].connection, nil
 }

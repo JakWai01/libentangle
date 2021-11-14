@@ -12,7 +12,6 @@ import (
 
 	api "github.com/alphahorizon/libentangle/pkg/api/websockets/v1"
 	"github.com/google/uuid"
-	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
 )
@@ -23,18 +22,18 @@ var (
 
 type SignalingClient struct {
 	onAcceptance   func(conn *websocket.Conn, uuid string) error
-	onIntroduction func(conn *websocket.Conn, data []byte, peerConnecton *webrtc.PeerConnection, uuid string) error
-	onOffer        func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup, uuid string) error
-	onAnswer       func(data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error
+	onIntroduction func(conn *websocket.Conn, data []byte, uuid string) error
+	onOffer        func(conn *websocket.Conn, data []byte, candidates *chan string, wg *sync.WaitGroup, uuid string) error
+	onAnswer       func(data []byte, candidates *chan string, wg *sync.WaitGroup) error
 	onCandidate    func(data []byte, candidates *chan string) error
 	onResignation  func() error
 }
 
 func NewSignalingClient(
 	onAcceptance func(conn *websocket.Conn, uuid string) error,
-	onIntroduction func(conn *websocket.Conn, data []byte, peerConnecton *webrtc.PeerConnection, uuid string) error,
-	onOffer func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup, uuid string) error,
-	onAnswer func(data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error,
+	onIntroduction func(conn *websocket.Conn, data []byte, uuid string) error,
+	onOffer func(conn *websocket.Conn, data []byte, candidates *chan string, wg *sync.WaitGroup, uuid string) error,
+	onAnswer func(data []byte, candidates *chan string, wg *sync.WaitGroup) error,
 	onCandidate func(data []byte, candidates *chan string) error,
 	onResignation func() error,
 ) *SignalingClient {
@@ -62,33 +61,11 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byt
 	}
 	defer conn.Close(websocket.StatusNormalClosure, "Closing websocket connection nominally")
 
-	// Prepare configuration
-	var config = webrtc.Configuration{
-		ICEServers: []webrtc.ICEServer{
-			{
-				URLs: []string{"stun:stun.l.google.com:19302"},
-			},
-		},
-	}
-
-	// Create RTCPeerConnection for each introduction we receive, not at this point. After done that, we can probably assign a mac to said peerConnection and get the corresponding receiver for a message.
-	var peerConnection, err = webrtc.NewPeerConnection(config)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() {
-		if cErr := peerConnection.Close(); cErr != nil {
-			log.Printf("cannot close peerConnection: %v\n", cErr)
-		}
-	}()
-
 	var wg sync.WaitGroup
 	wg.Add(1)
 
 	candidates := make(chan string)
 
-	// Set the handler for peer connection state
-	// This will notify you when the peer has connected/disconnected
 	go func() {
 		if err := wsjson.Write(context.Background(), conn, api.NewApplication(communityKey, uuid)); err != nil {
 			log.Fatal(err)
@@ -113,7 +90,6 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byt
 			// Read message from connection
 			_, data, err := conn.Read(context.Background())
 			if err != nil {
-				fmt.Println(peerConnection.ConnectionState())
 				log.Fatal(err)
 			}
 
@@ -133,15 +109,15 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byt
 				break
 			case api.OpcodeIntroduction:
 				// cm.HandleIntroduction(conn, data, peerConnection)
-				s.onIntroduction(conn, data, peerConnection, uuid)
+				s.onIntroduction(conn, data, uuid)
 				break
 			case api.OpcodeOffer:
 				// cm.HandleOffer(conn, data, peerConnection, &candidates, &wg)
-				s.onOffer(conn, data, peerConnection, &candidates, &wg, uuid)
+				s.onOffer(conn, data, &candidates, &wg, uuid)
 				break
 			case api.OpcodeAnswer:
 				// cm.HandleAnswer(data, peerConnection, &candidates, &wg)
-				s.onAnswer(data, peerConnection, &candidates, &wg)
+				s.onAnswer(data, &candidates, &wg)
 				break
 			case api.OpcodeCandidate:
 				// cm.HandleCandidate(data, &candidates)

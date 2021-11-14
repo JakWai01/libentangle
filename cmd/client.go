@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/alphahorizon/libentangle/pkg/signaling"
-	"github.com/pion/webrtc/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"nhooyr.io/websocket"
@@ -30,14 +29,14 @@ var clientCmd = &cobra.Command{
 			func(conn *websocket.Conn, uuid string) error {
 				return manager.HandleAcceptance(conn, uuid)
 			},
-			func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, uuid string) error {
-				return manager.HandleIntroduction(conn, data, peerConnection, uuid)
+			func(conn *websocket.Conn, data []byte, uuid string) error {
+				return manager.HandleIntroduction(conn, data, uuid)
 			},
-			func(conn *websocket.Conn, data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup, uuid string) error {
-				return manager.HandleOffer(conn, data, peerConnection, candidates, wg, uuid)
+			func(conn *websocket.Conn, data []byte, candidates *chan string, wg *sync.WaitGroup, uuid string) error {
+				return manager.HandleOffer(conn, data, candidates, wg, uuid)
 			},
-			func(data []byte, peerConnection *webrtc.PeerConnection, candidates *chan string, wg *sync.WaitGroup) error {
-				return manager.HandleAnswer(data, peerConnection, candidates, wg)
+			func(data []byte, candidates *chan string, wg *sync.WaitGroup) error {
+				return manager.HandleAnswer(data, candidates, wg)
 			},
 			func(data []byte, candidates *chan string) error {
 				return manager.HandleCandidate(data, candidates)
@@ -63,7 +62,7 @@ var clientCmd = &cobra.Command{
 }
 
 func init() {
-	clientCmd.PersistentFlags().String(communityKey, "a", "Community to join")
+	clientCmd.PersistentFlags().String(communityKey, "testCommunityName", "Community to join")
 
 	// Bind env variables
 	if err := viper.BindPFlags(clientCmd.PersistentFlags()); err != nil {

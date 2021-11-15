@@ -240,11 +240,21 @@ func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string
 	})
 
 	// Register data channel creation handling
-	peerConnection.OnDataChannel(func(d *webrtc.DataChannel) {
-		d.OnOpen(func() {
-			if sendErr := d.Send([]byte("Hello World!")); sendErr != nil {
-				log.Fatal(sendErr)
-			}
+	peerConnection.OnDataChannel(func(dc *webrtc.DataChannel) {
+		dc.OnOpen(func() {
+			log.Println("sendChannel has opened")
+
+			m.peers[mac].channel = dc
+		})
+		dc.OnClose(func() {
+			log.Println("sendChannel has closed")
+		})
+		dc.OnMessage(func(msg webrtc.DataChannelMessage) {
+			log.Printf("Message from DataChannel %s payload %s", dc.Label(), string(msg.Data))
+
+			// We do not want to exit the dataChannel anymore
+			// defer dc.Close()
+			// exitClient <- struct{}{}
 		})
 	})
 

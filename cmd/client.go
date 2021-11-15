@@ -21,9 +21,6 @@ var clientCmd = &cobra.Command{
 	Short: "Start a signaling client.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		// fatal := make(chan error)
-		// done := make(chan struct{})
-
 		manager := signaling.NewClientManager()
 
 		client := signaling.NewSignalingClient(
@@ -58,15 +55,6 @@ var clientCmd = &cobra.Command{
 			manager.SendMessage(text)
 
 		}
-
-		// for {
-		// 	select {
-		// 	case err := <-fatal:
-		// 		log.Fatal(err)
-		// 	case <-done:
-		// 		os.Exit(0)
-		// 	}
-		// }
 	},
 }
 

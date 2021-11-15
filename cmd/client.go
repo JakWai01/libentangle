@@ -29,8 +29,8 @@ var clientCmd = &cobra.Command{
 			func(conn *websocket.Conn, uuid string) error {
 				return manager.HandleAcceptance(conn, uuid)
 			},
-			func(conn *websocket.Conn, data []byte, uuid string) error {
-				return manager.HandleIntroduction(conn, data, uuid)
+			func(conn *websocket.Conn, data []byte, uuid string, wg *sync.WaitGroup) error {
+				return manager.HandleIntroduction(conn, data, uuid, wg)
 			},
 			func(conn *websocket.Conn, data []byte, candidates *chan string, wg *sync.WaitGroup, uuid string) error {
 				return manager.HandleOffer(conn, data, candidates, wg, uuid)

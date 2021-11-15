@@ -22,7 +22,7 @@ var (
 
 type SignalingClient struct {
 	onAcceptance   func(conn *websocket.Conn, uuid string) error
-	onIntroduction func(conn *websocket.Conn, data []byte, uuid string) error
+	onIntroduction func(conn *websocket.Conn, data []byte, uuid string, wg *sync.WaitGroup) error
 	onOffer        func(conn *websocket.Conn, data []byte, candidates *chan string, wg *sync.WaitGroup, uuid string) error
 	onAnswer       func(data []byte, candidates *chan string, wg *sync.WaitGroup) error
 	onCandidate    func(data []byte, candidates *chan string) error
@@ -31,7 +31,7 @@ type SignalingClient struct {
 
 func NewSignalingClient(
 	onAcceptance func(conn *websocket.Conn, uuid string) error,
-	onIntroduction func(conn *websocket.Conn, data []byte, uuid string) error,
+	onIntroduction func(conn *websocket.Conn, data []byte, uuid string, wg *sync.WaitGroup) error,
 	onOffer func(conn *websocket.Conn, data []byte, candidates *chan string, wg *sync.WaitGroup, uuid string) error,
 	onAnswer func(data []byte, candidates *chan string, wg *sync.WaitGroup) error,
 	onCandidate func(data []byte, candidates *chan string) error,
@@ -58,7 +58,7 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byt
 	defer conn.Close(websocket.StatusNormalClosure, "Closing websocket connection nominally")
 
 	var wg sync.WaitGroup
-	wg.Add(1)
+	// wg.Add(1)
 
 	candidates := make(chan string)
 
@@ -103,7 +103,7 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byt
 				s.onAcceptance(conn, uuid)
 				break
 			case api.OpcodeIntroduction:
-				s.onIntroduction(conn, data, uuid)
+				s.onIntroduction(conn, data, uuid, &wg)
 				break
 			case api.OpcodeOffer:
 				s.onOffer(conn, data, &candidates, &wg, uuid)

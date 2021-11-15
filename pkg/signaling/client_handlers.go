@@ -13,6 +13,10 @@ import (
 	"nhooyr.io/websocket/wsjson"
 )
 
+var (
+	mac string
+)
+
 type ClientManager struct {
 	lock sync.Mutex
 
@@ -32,17 +36,21 @@ type peer struct {
 }
 
 func (m *ClientManager) HandleAcceptance(conn *websocket.Conn, uuid string) error {
+	mac = uuid
+
 	if err := wsjson.Write(context.Background(), conn, api.NewReady(uuid)); err != nil {
 		log.Fatal(err)
 	}
 	return nil
 }
 
-func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, uuid string) error {
+func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, uuid string, wg *sync.WaitGroup) error {
 	var introduction api.Introduction
 	if err := json.Unmarshal(data, &introduction); err != nil {
 		log.Fatal(err)
 	}
+
+	wg.Add(1)
 
 	peerConnection, err := m.createPeer(introduction.Mac, conn, uuid)
 	if err != nil {
@@ -78,6 +86,8 @@ func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, candidate
 	if err := json.Unmarshal(data, &offer); err != nil {
 		log.Fatal(err)
 	}
+
+	wg.Add(1)
 
 	var offer_val webrtc.SessionDescription
 
@@ -242,22 +252,24 @@ func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string
 }
 
 func (m *ClientManager) createDataChannel(mac string, peerConnection *webrtc.PeerConnection) error {
-	sendChannel, err := peerConnection.CreateDataChannel("foo", nil)
+	dc, err := peerConnection.CreateDataChannel("foo", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	sendChannel.OnClose(func() {
+	dc.OnOpen(func() {
+		log.Println("sendChannel has opened")
+
+		m.peers[mac].channel = dc
+	})
+	dc.OnClose(func() {
 		log.Println("sendChannel has closed")
 	})
-	sendChannel.OnOpen(func() {
-		log.Println("sendChannel has opened")
-	})
-	sendChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
-		log.Printf("Message from DataChannel %s payload %s", sendChannel.Label(), string(msg.Data))
+	dc.OnMessage(func(msg webrtc.DataChannelMessage) {
+		log.Printf("Message from DataChannel %s payload %s", dc.Label(), string(msg.Data))
 
-		defer sendChannel.Close()
-
-		exitClient <- struct{}{}
+		// We do not want to exit the dataChannel anymore
+		// defer dc.Close()
+		// exitClient <- struct{}{}
 	})
 
 	return nil
@@ -265,4 +277,14 @@ func (m *ClientManager) createDataChannel(mac string, peerConnection *webrtc.Pee
 
 func (m *ClientManager) getPeerConnection(mac string) (*webrtc.PeerConnection, error) {
 	return m.peers[mac].connection, nil
+}
+
+func (m *ClientManager) SendMessage(msg string) error {
+	// Send to all but not to ourselfes
+	for key := range m.peers {
+		if key != mac {
+			m.peers[key].channel.Send([]byte(msg))
+		}
+	}
+	return nil
 }

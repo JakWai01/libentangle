@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"log"
 	"os"
 	"sync"
@@ -20,8 +21,8 @@ var clientCmd = &cobra.Command{
 	Short: "Start a signaling client.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		fatal := make(chan error)
-		done := make(chan struct{})
+		// fatal := make(chan error)
+		// done := make(chan struct{})
 
 		manager := signaling.NewClientManager()
 
@@ -50,14 +51,22 @@ var clientCmd = &cobra.Command{
 			go client.HandleConn("localhost:9090", viper.GetString(communityKey))
 		}()
 
+		// Use generic send function to send a message, after the connection was established
 		for {
-			select {
-			case err := <-fatal:
-				log.Fatal(err)
-			case <-done:
-				os.Exit(0)
-			}
+			reader := bufio.NewReader(os.Stdin)
+			text, _ := reader.ReadString('\n')
+			manager.SendMessage(text)
+
 		}
+
+		// for {
+		// 	select {
+		// 	case err := <-fatal:
+		// 		log.Fatal(err)
+		// 	case <-done:
+		// 		os.Exit(0)
+		// 	}
+		// }
 	},
 }
 

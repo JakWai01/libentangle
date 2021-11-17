@@ -17,15 +17,15 @@ C2 --> S: Ready()
 
 S --> C1: Introduction(mac: 124)
 
-C1 --> S: Offer(mac: 124, payload: asdf)
-S --> C2: Offer(mac: 123, payload: asdf)
-C2 --> S: Answer(mac: 123, payload: asdf)
-S --> C1: Answer(mac: 124, payload: asdf)
+C1 --> S: Offer(payload: asdf, sender: 123, receiver: 124)
+S --> C2: Offer(payload: asdf, sender: 123, receiver: 124)
+C2 --> S: Answer(payload: asdf, sender: 124, receiver: 123)
+S --> C1: Answer(payload: asdf, sender: 124, receiver: 123)
 
-C1 --> S: Candidate(mac: 124, payload: asdf)
-S --> C2: Candidate(mac: 123, payload: asdf)
-C2 --> S: Candidate(mac: 123, payload: asdf)
-S --> C1: Candidate(mac: 124, payload: asdf)
+C1 --> S: Candidate(payload: asdf, sender: 123, receiver: 124)
+S --> C2: Candidate(payload: asdf, sender: 123, receiver: 124)
+C2 --> S: Candidate(payload: asdf, sender: 124, receiver: 123)
+S --> C1: Candidate(payload: asdf, sender: 124, receiver: 123)
 
 C1 --> S: Exited()
 S --> C2: Resignation(mac: 123)

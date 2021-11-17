@@ -3,7 +3,6 @@ package signaling
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -58,7 +57,6 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byt
 	defer conn.Close(websocket.StatusNormalClosure, "Closing websocket connection nominally")
 
 	var wg sync.WaitGroup
-	// wg.Add(1)
 
 	candidates := make(chan string)
 
@@ -83,21 +81,16 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byt
 
 	go func() {
 		for {
-			// Read message from connection
 			_, data, err := conn.Read(context.Background())
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			// Parse message
 			var v api.Message
 			if err := json.Unmarshal(data, &v); err != nil {
 				log.Fatal(err)
 			}
 
-			fmt.Println(v)
-
-			// Handle different message types
 			switch v.Opcode {
 			case api.OpcodeAcceptance:
 				s.onAcceptance(conn, uuid)

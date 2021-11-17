@@ -15,7 +15,6 @@ var signalCmd = &cobra.Command{
 	Use:   "signal",
 	Short: "Start a signaling server",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Handle lifecycle
 
 		for {
 			addr, err := net.ResolveTCPAddr("tcp", "localhost:9090")

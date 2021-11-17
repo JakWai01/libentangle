@@ -48,7 +48,6 @@ var clientCmd = &cobra.Command{
 			go client.HandleConn("localhost:9090", viper.GetString(communityKey))
 		}()
 
-		// Use generic send function to send a message, after the connection was established
 		for {
 			reader := bufio.NewReader(os.Stdin)
 			text, _ := reader.ReadString('\n')

@@ -10,7 +10,6 @@ import (
 	"nhooyr.io/websocket"
 )
 
-// TODO: modify the signaling protocol
 // The signaling protocol is located at /docs/signaling-protocol.txt
 
 type SignalingServer struct {
@@ -45,13 +44,11 @@ func (s *SignalingServer) HandleConn(conn websocket.Conn) {
 	go func() {
 	loop:
 		for {
-			// Read message from connection
 			_, data, err := conn.Read(context.Background())
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			// Parse message
 			var v api.Message
 			if err := json.Unmarshal(data, &v); err != nil {
 				log.Fatal(err)
@@ -59,7 +56,6 @@ func (s *SignalingServer) HandleConn(conn websocket.Conn) {
 
 			fmt.Println(v)
 
-			// Handle different message types
 			switch v.Opcode {
 			case api.OpcodeApplication:
 				var application api.Application

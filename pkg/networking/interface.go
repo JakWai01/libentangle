@@ -54,7 +54,3 @@ func Write(msg string) error {
 	}
 	return &NoConnectionEstablished{}
 }
-
-func Read(msg string) error {
-	return nil
-}

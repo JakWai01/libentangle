@@ -111,7 +111,6 @@ func (m *ServerManager) HandleExited(exited api.Exited) error {
 		log.Fatal(err)
 	}
 
-	// Broadcast the resignation to all members in the community
 	for _, mac := range m.communities[community] {
 		if mac != exited.Mac {
 			receiver := m.macs[mac]

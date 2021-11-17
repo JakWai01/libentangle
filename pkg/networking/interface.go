@@ -54,3 +54,11 @@ func Write(msg string) error {
 	}
 	return &NoConnectionEstablished{}
 }
+
+func WriteUnicast(msg string, mac string) error {
+	if manager != nil {
+		manager.SendMessageUnicast(msg, mac)
+		return nil
+	}
+	return &NoConnectionEstablished{}
+}

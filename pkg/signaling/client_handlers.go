@@ -283,8 +283,20 @@ func (m *ClientManager) getPeerConnection(mac string) (*webrtc.PeerConnection, e
 func (m *ClientManager) SendMessage(msg string) error {
 	for key := range m.peers {
 		if key != mac {
-			m.peers[key].channel.Send([]byte(msg))
+			if err := m.peers[key].channel.Send([]byte(msg)); err != nil {
+				return nil
+			} else {
+				return err
+			}
 		}
 	}
 	return nil
+}
+
+func (m *ClientManager) SendMessageUnicast(msg string, mac string) error {
+	if err := m.peers[mac].channel.Send([]byte(msg)); err != nil {
+		return nil
+	} else {
+		return err
+	}
 }

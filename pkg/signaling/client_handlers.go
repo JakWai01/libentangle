@@ -239,7 +239,6 @@ func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string
 		}
 	})
 
-	// Register data channel creation handling
 	peerConnection.OnDataChannel(func(dc *webrtc.DataChannel) {
 		dc.OnOpen(func() {
 			log.Println("sendChannel has opened")
@@ -251,10 +250,6 @@ func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string
 		})
 		dc.OnMessage(func(msg webrtc.DataChannelMessage) {
 			log.Printf("Message from DataChannel %s payload %s", dc.Label(), string(msg.Data))
-
-			// We do not want to exit the dataChannel anymore
-			// defer dc.Close()
-			// exitClient <- struct{}{}
 		})
 	})
 
@@ -276,10 +271,6 @@ func (m *ClientManager) createDataChannel(mac string, peerConnection *webrtc.Pee
 	})
 	dc.OnMessage(func(msg webrtc.DataChannelMessage) {
 		log.Printf("Message from DataChannel %s payload %s", dc.Label(), string(msg.Data))
-
-		// We do not want to exit the dataChannel anymore
-		// defer dc.Close()
-		// exitClient <- struct{}{}
 	})
 
 	return nil
@@ -290,7 +281,6 @@ func (m *ClientManager) getPeerConnection(mac string) (*webrtc.PeerConnection, e
 }
 
 func (m *ClientManager) SendMessage(msg string) error {
-	// Send to all but not to ourselfes
 	for key := range m.peers {
 		if key != mac {
 			m.peers[key].channel.Send([]byte(msg))

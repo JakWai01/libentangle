@@ -46,7 +46,7 @@ func Connect(community string) {
 	}()
 }
 
-func Write(msg string) error {
+func Write(msg []byte) error {
 	if manager != nil {
 		manager.SendMessage(msg)
 		return nil
@@ -54,7 +54,7 @@ func Write(msg string) error {
 	return &NoConnectionEstablished{}
 }
 
-func WriteUnicast(msg string, mac string) error {
+func WriteUnicast(msg []byte, mac string) error {
 	if manager != nil {
 		manager.SendMessageUnicast(msg, mac)
 		return nil

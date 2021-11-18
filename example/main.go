@@ -13,6 +13,6 @@ func main() {
 	for {
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
-		networking.Write(text)
+		networking.Write([]byte(text))
 	}
 }

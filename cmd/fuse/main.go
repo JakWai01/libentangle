@@ -1,9 +1,3 @@
-// Copyright 2016 the Go-FUSE Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-// This program is the analogon of libfuse's hello.c, a a program that
-// exposes a single file "file.txt" in the root directory.
 package main
 
 import (
@@ -16,6 +10,7 @@ import (
 	"github.com/hanwen/go-fuse/v2/fuse"
 )
 
+// Define type for the nodes of the file system tree
 type HelloRoot struct {
 	fs.Inode
 }
@@ -24,7 +19,7 @@ type HelloRoot struct {
 func (r *HelloRoot) OnAdd(ctx context.Context) {
 	ch := r.NewPersistentInode(
 		ctx, &fs.MemRegularFile{
-			// Content of the file
+			// File content
 			Data: []byte("Hello World"),
 			Attr: fuse.Attr{
 				Mode: 0644,
@@ -57,5 +52,7 @@ func main() {
 	}
 	defer server.Unmount()
 
+	// Start serving the file system
 	server.Wait()
+
 }

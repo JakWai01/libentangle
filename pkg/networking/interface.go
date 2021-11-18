@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/alphahorizon/libentangle/pkg/signaling"
-	"github.com/spf13/viper"
 	"nhooyr.io/websocket"
 )
 
@@ -43,7 +42,7 @@ func Connect(community string) {
 	)
 
 	go func() {
-		go client.HandleConn("localhost:9090", viper.GetString(community))
+		go client.HandleConn("localhost:9090", community)
 	}()
 }
 

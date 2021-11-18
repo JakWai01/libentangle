@@ -15,6 +15,8 @@ import (
 
 var (
 	mac string
+	DC  chan *webrtc.DataChannel
+	DC2 chan *webrtc.DataChannel
 )
 
 type ClientManager struct {
@@ -244,6 +246,8 @@ func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string
 			log.Println("sendChannel has opened")
 
 			m.peers[mac].channel = dc
+			// write to channel
+			DC <- dc
 		})
 		dc.OnClose(func() {
 			log.Println("sendChannel has closed")
@@ -265,6 +269,9 @@ func (m *ClientManager) createDataChannel(mac string, peerConnection *webrtc.Pee
 		log.Println("sendChannel has opened")
 
 		m.peers[mac].channel = dc
+
+		DC2 <- dc
+
 	})
 	dc.OnClose(func() {
 		log.Println("sendChannel has closed")
@@ -280,10 +287,10 @@ func (m *ClientManager) getPeerConnection(mac string) (*webrtc.PeerConnection, e
 	return m.peers[mac].connection, nil
 }
 
-func (m *ClientManager) SendMessage(msg string) error {
+func (m *ClientManager) SendMessage(msg []byte) error {
 	for key := range m.peers {
 		if key != mac {
-			if err := m.peers[key].channel.Send([]byte(msg)); err != nil {
+			if err := m.peers[key].channel.Send(msg); err != nil {
 				return nil
 			} else {
 				return err
@@ -293,8 +300,8 @@ func (m *ClientManager) SendMessage(msg string) error {
 	return nil
 }
 
-func (m *ClientManager) SendMessageUnicast(msg string, mac string) error {
-	if err := m.peers[mac].channel.Send([]byte(msg)); err != nil {
+func (m *ClientManager) SendMessageUnicast(msg []byte, mac string) error {
+	if err := m.peers[mac].channel.Send(msg); err != nil {
 		return nil
 	} else {
 		return err

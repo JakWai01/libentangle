@@ -48,7 +48,7 @@ func main() {
 			fmt.Println(string(b))
 
 			// send json to receiver
-			networking.Write(string(b))
+			networking.Write(b)
 		} else {
 			// Get this path from somewhere else
 			if f.Name() != "picture.png" {
@@ -64,7 +64,7 @@ func main() {
 					log.Fatal(err)
 				}
 				fmt.Println(string(b))
-				networking.Write(string(b))
+				networking.Write(b)
 			}
 
 		}

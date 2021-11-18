@@ -24,6 +24,8 @@ func main() {
 
 	networking.Connect("test")
 
+	// We need some kind of way to wait until we are connected, can we return the Connect function onOpen and actually do the stuff in the background?
+	// We can return a datachannel and overwrite the OnMessage function to what we want to do.
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadString('\n')
 

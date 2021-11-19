@@ -14,9 +14,10 @@ import (
 )
 
 var (
-	mac string
-	DC  chan *webrtc.DataChannel
-	DC2 chan *webrtc.DataChannel
+	mac      string
+	DC       chan *webrtc.DataChannel
+	DC2      chan *webrtc.DataChannel
+	Messages chan []byte
 )
 
 type ClientManager struct {
@@ -46,7 +47,7 @@ func (m *ClientManager) HandleAcceptance(conn *websocket.Conn, uuid string) erro
 	return nil
 }
 
-func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, uuid string, wg *sync.WaitGroup) error {
+func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, uuid string, wg *sync.WaitGroup, f func(msg webrtc.DataChannelMessage)) error {
 	var introduction api.Introduction
 	if err := json.Unmarshal(data, &introduction); err != nil {
 		log.Fatal(err)
@@ -54,12 +55,12 @@ func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, uu
 
 	wg.Add(1)
 
-	peerConnection, err := m.createPeer(introduction.Mac, conn, uuid)
+	peerConnection, err := m.createPeer(introduction.Mac, conn, uuid, f)
 	if err != nil {
 		return err
 	}
 
-	if err := m.createDataChannel(introduction.Mac, peerConnection); err != nil {
+	if err := m.createDataChannel(introduction.Mac, peerConnection, f); err != nil {
 		return err
 	}
 
@@ -83,7 +84,7 @@ func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, uu
 	return nil
 }
 
-func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, candidates *chan string, wg *sync.WaitGroup, uuid string) error {
+func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, candidates *chan string, wg *sync.WaitGroup, uuid string, f func(msg webrtc.DataChannelMessage)) error {
 	var offer api.Offer
 	if err := json.Unmarshal(data, &offer); err != nil {
 		log.Fatal(err)
@@ -97,7 +98,7 @@ func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, candidate
 		log.Fatal(err)
 	}
 
-	peerConnection, err := m.createPeer(offer.SenderMac, conn, uuid)
+	peerConnection, err := m.createPeer(offer.SenderMac, conn, uuid, f)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -201,7 +202,7 @@ func (m *ClientManager) HandleResignation() error {
 	return nil
 }
 
-func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string) (*webrtc.PeerConnection, error) {
+func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string, f func(msg webrtc.DataChannelMessage)) (*webrtc.PeerConnection, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -246,21 +247,18 @@ func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string
 			log.Println("sendChannel has opened")
 
 			m.peers[mac].channel = dc
-			// write to channel
-			DC <- dc
+
 		})
 		dc.OnClose(func() {
 			log.Println("sendChannel has closed")
 		})
-		dc.OnMessage(func(msg webrtc.DataChannelMessage) {
-			log.Printf("Message from DataChannel %s payload %s", dc.Label(), string(msg.Data))
-		})
+		dc.OnMessage(f)
 	})
 
 	return peerConnection, nil
 }
 
-func (m *ClientManager) createDataChannel(mac string, peerConnection *webrtc.PeerConnection) error {
+func (m *ClientManager) createDataChannel(mac string, peerConnection *webrtc.PeerConnection, f func(msg webrtc.DataChannelMessage)) error {
 	dc, err := peerConnection.CreateDataChannel("foo", nil)
 	if err != nil {
 		log.Fatal(err)
@@ -269,16 +267,11 @@ func (m *ClientManager) createDataChannel(mac string, peerConnection *webrtc.Pee
 		log.Println("sendChannel has opened")
 
 		m.peers[mac].channel = dc
-
-		DC2 <- dc
-
 	})
 	dc.OnClose(func() {
 		log.Println("sendChannel has closed")
 	})
-	dc.OnMessage(func(msg webrtc.DataChannelMessage) {
-		log.Printf("Message from DataChannel %s payload %s", dc.Label(), string(msg.Data))
-	})
+	dc.OnMessage(f)
 
 	return nil
 }

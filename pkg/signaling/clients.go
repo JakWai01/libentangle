@@ -11,6 +11,7 @@ import (
 
 	api "github.com/alphahorizon/libentangle/pkg/api/websockets/v1"
 	"github.com/google/uuid"
+	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
 )
@@ -46,7 +47,7 @@ func NewSignalingClient(
 	}
 }
 
-func (s *SignalingClient) HandleConn(laddrKey string, communityKey string) []byte {
+func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, f func(msg webrtc.DataChannelMessage)) []byte {
 	uuid := uuid.NewString()
 
 	wsAddress := "ws://" + laddrKey

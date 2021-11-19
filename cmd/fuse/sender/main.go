@@ -9,20 +9,26 @@ import (
 	"os"
 
 	"github.com/alphahorizon/libentangle/pkg/networking"
+	"github.com/pion/webrtc/v3"
 )
 
+type Message struct {
+	Opcode string `json:"opcode"`
+}
 type File struct {
+	Message
 	Name    string `json:name`
 	Content []byte `json:content`
 }
 
 type Folder struct {
+	Message
 	Name string `json:name`
 }
 
 func main() {
 
-	networking.Connect("test")
+	networking.Connect("test", func(msg webrtc.DataChannelMessage) { log.Printf("Message: %s", msg.Data) })
 
 	// We need some kind of way to wait until we are connected, can we return the Connect function onOpen and actually do the stuff in the background?
 	// We can return a datachannel and overwrite the OnMessage function to what we want to do.
@@ -40,7 +46,7 @@ func main() {
 		// If Folder, create Folder, send it
 
 		if f.IsDir() {
-			folder := Folder{Name: f.Name()}
+			folder := Folder{Message: Message{"folder"}, Name: f.Name()}
 			b, err := json.Marshal(folder)
 			if err != nil {
 				log.Println(err)
@@ -57,7 +63,7 @@ func main() {
 					log.Fatal(err)
 				}
 
-				file := File{Name: f.Name(), Content: dat}
+				file := File{Message: Message{"file"}, Name: f.Name(), Content: dat}
 
 				b, err := json.Marshal(file)
 				if err != nil {

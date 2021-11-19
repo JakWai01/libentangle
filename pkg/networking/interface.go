@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/alphahorizon/libentangle/pkg/signaling"
+	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"
 )
 
@@ -17,7 +18,7 @@ func (m *NoConnectionEstablished) Error() string {
 	return "No connection established so far. Either the Connect() has not been called yet or the connection was still in the making"
 }
 
-func Connect(community string) {
+func Connect(community string, f func(msg webrtc.DataChannelMessage)) {
 	manager = signaling.NewClientManager()
 
 	client := signaling.NewSignalingClient(
@@ -25,10 +26,10 @@ func Connect(community string) {
 			return manager.HandleAcceptance(conn, uuid)
 		},
 		func(conn *websocket.Conn, data []byte, uuid string, wg *sync.WaitGroup) error {
-			return manager.HandleIntroduction(conn, data, uuid, wg)
+			return manager.HandleIntroduction(conn, data, uuid, wg, f)
 		},
 		func(conn *websocket.Conn, data []byte, candidates *chan string, wg *sync.WaitGroup, uuid string) error {
-			return manager.HandleOffer(conn, data, candidates, wg, uuid)
+			return manager.HandleOffer(conn, data, candidates, wg, uuid, f)
 		},
 		func(data []byte, candidates *chan string, wg *sync.WaitGroup) error {
 			return manager.HandleAnswer(data, candidates, wg)
@@ -42,7 +43,7 @@ func Connect(community string) {
 	)
 
 	go func() {
-		go client.HandleConn("localhost:9090", community)
+		go client.HandleConn("localhost:9090", community, f)
 	}()
 }
 

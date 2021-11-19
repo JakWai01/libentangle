@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/alphahorizon/libentangle/pkg/networking"
+	"github.com/pion/webrtc/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -19,7 +20,7 @@ var clientCmd = &cobra.Command{
 	Short: "Start a signaling client.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		networking.Connect("test")
+		networking.Connect("test", func(msg webrtc.DataChannelMessage) { log.Printf("Message: %s", msg.Data) })
 
 		for {
 			reader := bufio.NewReader(os.Stdin)

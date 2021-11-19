@@ -1,32 +1,56 @@
 package main
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
-	"os"
+	"log"
 
 	"github.com/alphahorizon/libentangle/pkg/networking"
-	"github.com/alphahorizon/libentangle/pkg/signaling"
+	"github.com/pion/webrtc/v3"
 )
 
+type Message struct {
+	Opcode string `json:"opcode"`
+}
+type File struct {
+	Message
+	Name    string `json:name`
+	Content []byte `json:content`
+}
+
+type Folder struct {
+	Message
+	Name string `json:name`
+}
+
 func main() {
-	networking.Connect("test")
+	networking.Connect("test", func(msg webrtc.DataChannelMessage) {
+		log.Printf("Message: %s", msg.Data)
 
-	<-signaling.DC
-	// <-signaling.DC2
-	// dc.OnMessage(func(msg webrtc.DataChannelMessage) {
-	// 	log.Printf("Message from Jakobs DataChannel %s payload %s", dc.Label(), string(msg.Data))
-	// })
-	// dc2.OnMessage(func(msg webrtc.DataChannelMessage) {
-	// 	log.Printf("Message from Jakobs DataChannel %s payload %s", dc.Label(), string(msg.Data))
-	// })
+		var v Message
+		if err := json.Unmarshal(msg.Data, &v); err != nil {
+			log.Fatal(err)
+		}
 
-	fmt.Println("DAS:LDKSA:LKD:SAKD:LA")
+		switch v.Opcode {
+		case "folder":
+			fmt.Println("folder")
+			var folder Folder
+			if err := json.Unmarshal(msg.Data, &folder); err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(folder.Name)
+		case "file":
+			fmt.Println("file")
+			var file File
+			if err := json.Unmarshal(msg.Data, &file); err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(string(file.Content))
+		default:
+			log.Fatal("Invalid opcode!")
+		}
+	})
 
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		text, _ := reader.ReadString('\n')
-		networking.Write([]byte(text))
-
-	}
+	select {}
 }

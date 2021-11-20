@@ -34,18 +34,18 @@ type HelloRoot struct {
 	fs.Inode
 }
 
-// Handle messages from the datachannel here. Receive some opcode when we are done adding the files.
+// At the moment nothing happens when the file system is initialized
 func (r *HelloRoot) OnAdd(ctx context.Context) {
-	ch := r.NewPersistentInode(
-		ctx, &fs.MemRegularFile{
-			// File content
-			Data: []byte("Hello World"),
-			Attr: fuse.Attr{
-				Mode: 0644,
-			},
-		}, fs.StableAttr{Ino: 2})
-	// File name
-	r.AddChild("file.txt", ch, false)
+	// ch := r.NewPersistentInode(
+	// 	ctx, &fs.MemRegularFile{
+	// 		// File content
+	// 		Data: []byte("Hello World"),
+	// 		Attr: fuse.Attr{
+	// 			Mode: 0644,
+	// 		},
+	// 	}, fs.StableAttr{Ino: 2})
+	// // File name
+	// r.AddChild("file.txt", ch, false)
 }
 
 func (r *HelloRoot) Getattr(ctx context.Context, fh fs.FileHandle, out *fuse.AttrOut) syscall.Errno {
@@ -60,7 +60,9 @@ func main() {
 	flag.Parse()
 	opts := &fs.Options{}
 
-	server, err := fs.Mount(flag.Arg(0), &HelloRoot{}, opts)
+	root := &HelloRoot{}
+
+	server, err := fs.Mount(flag.Arg(0), root, opts)
 	if err != nil {
 		log.Fatalf("Mount fail: %v\n", err)
 	}
@@ -85,6 +87,7 @@ func main() {
 			fmt.Println(folder.Name)
 
 			os.Mkdir(folder.Name, 0777)
+
 		case "file":
 			fmt.Println("file")
 			var file File
@@ -93,7 +96,16 @@ func main() {
 			}
 			fmt.Println(string(file.Content))
 
-			os.WriteFile(file.Name, file.Content, 0777)
+			ch := root.NewPersistentInode(
+				context.Background(), &fs.MemRegularFile{
+					// File content
+					Data: file.Content,
+					Attr: fuse.Attr{
+						Mode: 0644,
+					},
+				}, fs.StableAttr{Ino: 2})
+			// File name
+			root.AddChild(file.Name, ch, false)
 		default:
 			log.Fatal("Invalid opcode!")
 		}

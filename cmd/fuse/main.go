@@ -37,14 +37,27 @@ func (r *HelloRoot) Getattr(ctx context.Context, fh fs.FileHandle, out *fuse.Att
 var _ = (fs.NodeGetattrer)((*HelloRoot)(nil))
 var _ = (fs.NodeOnAdder)((*HelloRoot)(nil))
 
+func (r *HelloRoot) Create(ctx context.Context) {
+	ch := r.NewPersistentInode(
+		ctx, &fs.MemRegularFile{
+			// File content
+			Data: []byte("Hello World"),
+			Attr: fuse.Attr{
+				Mode: 0644,
+			},
+		}, fs.StableAttr{Ino: 2})
+	// File name
+	r.AddChild("file2.txt", ch, false)
+}
+
 func main() {
-	debug := flag.Bool("debug", false, "print debug data")
+	// debug := flag.Bool("debug", false, "print debug data")
 	flag.Parse()
-	if len(flag.Args()) < 1 {
-		log.Fatal("Usage:\n  hello MOUNTPOINT")
-	}
+	// if len(flag.Args()) < 1 {
+	// 	log.Fatal("Usage:\n  hello MOUNTPOINT")
+	// }
 	opts := &fs.Options{}
-	opts.Debug = *debug
+	// opts.Debug = *debug
 
 	server, err := fs.Mount(flag.Arg(0), &HelloRoot{}, opts)
 	if err != nil {

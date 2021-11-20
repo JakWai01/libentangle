@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"syscall"
 
 	"github.com/alphahorizon/libentangle/pkg/networking"
@@ -52,6 +53,9 @@ func (r *HelloRoot) Getattr(ctx context.Context, fh fs.FileHandle, out *fuse.Att
 	return 0
 }
 
+var _ = (fs.NodeGetattrer)((*HelloRoot)(nil))
+var _ = (fs.NodeOnAdder)((*HelloRoot)(nil))
+
 func main() {
 	flag.Parse()
 	opts := &fs.Options{}
@@ -60,6 +64,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Mount fail: %v\n", err)
 	}
+
 	defer server.Unmount()
 
 	networking.Connect("test", func(msg webrtc.DataChannelMessage) {
@@ -78,6 +83,8 @@ func main() {
 				log.Fatal(err)
 			}
 			fmt.Println(folder.Name)
+
+			os.Mkdir(folder.Name, 0777)
 		case "file":
 			fmt.Println("file")
 			var file File
@@ -85,6 +92,8 @@ func main() {
 				log.Fatal(err)
 			}
 			fmt.Println(string(file.Content))
+
+			os.WriteFile(file.Name, file.Content, 0777)
 		default:
 			log.Fatal("Invalid opcode!")
 		}

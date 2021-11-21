@@ -3,6 +3,7 @@ module github.com/alphahorizon/libentangle
 go 1.16
 
 require (
+	github.com/ProtonMail/gopenpgp/v2 v2.3.0 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/hanwen/go-fuse/v2 v2.1.0
 	github.com/pion/webrtc/v3 v3.1.6

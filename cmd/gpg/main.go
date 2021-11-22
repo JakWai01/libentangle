@@ -5,26 +5,32 @@ import (
 	"log"
 
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v2/helper"
 )
 
 var (
-	name    = "Jean Done"
-	email   = "jean@done.com"
-	rsaBits = 2048
+	name       = "Jean Done"
+	email      = "jean@done.com"
+	rsaBits    = 2048
+	passphrase = "password"
 )
 
 func main() {
-	fmt.Println(crypto.GetUnixTime())
-
 	// Generate RSA key
-	rsaKey, err := crypto.GenerateKey(name, email, "rsa", rsaBits)
+	rsaKey, err := helper.GenerateKey(name, email, []byte(passphrase), "rsa", rsaBits)
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(rsaKey)
 
-	if key, err := rsaKey.GetArmoredPublicKey(); err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println(string(key))
-	}
+	privKey, err := crypto.NewKeyFromArmored(rsaKey)
+
+	pubKey, err := privKey.GetArmoredPublicKey()
+
+	armor, err := helper.EncryptMessageArmored(pubKey, "Hallo Welt")
+
+	decrypted, err := helper.DecryptMessageArmored(rsaKey, []byte(passphrase), armor)
+
+	fmt.Println(decrypted)
+
 }

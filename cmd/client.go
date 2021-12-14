@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 
@@ -22,10 +21,7 @@ var clientCmd = &cobra.Command{
 	Use:   "client",
 	Short: "Start a signaling client.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// We can't override a file, since it would just get appended
-		// We should replace a file if it did exist before
 		networking.Connect("test", func(msg webrtc.DataChannelMessage) {
-			// This function gets called on every message
 			log.Printf("Message: %s", msg.Data)
 
 			var f *os.File
@@ -42,15 +38,12 @@ var clientCmd = &cobra.Command{
 				panic(err)
 			}
 
-			// Create file
-			fmt.Println("We entered the function")
 			f, err = os.OpenFile(file.Name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
 				panic(err)
 			}
 			defer f.Close()
 
-			// change this to switch
 			if bytes.Equal(file.Content, []byte("BOF")) {
 				f.Truncate(0)
 				f.Seek(0, 0)

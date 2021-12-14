@@ -51,9 +51,6 @@ func Connect(community string, f func(msg webrtc.DataChannelMessage)) {
 	}()
 }
 
-// Send EOF when finished
-// If this is a vulnerabilty and files could contain EOF, then just encode the content with base64
-
 type message struct {
 	Name    string `json:"name"`
 	Content []byte `json:"content"`
@@ -86,7 +83,7 @@ func ReadWriter() {
 			fmt.Println(string(buf[:n]))
 
 			msg := message{Name: "test.txt", Content: buf[:n]}
-			// Send struct, each message contains the name of the file
+
 			bytes, err := json.Marshal(msg)
 			if err != nil {
 				panic(err)

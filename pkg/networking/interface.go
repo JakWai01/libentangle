@@ -1,6 +1,9 @@
 package networking
 
 import (
+	"fmt"
+	"io"
+	"os"
 	"sync"
 
 	"github.com/alphahorizon/libentangle/pkg/signaling"
@@ -45,6 +48,29 @@ func Connect(community string, f func(msg webrtc.DataChannelMessage)) {
 	go func() {
 		go client.HandleConn("localhost:9090", community, f)
 	}()
+}
+
+func ReadWriter() {
+	f, err := os.Open("test.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	buf := make([]byte, 10)
+	for {
+		n, err := f.Read(buf)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+		if n > 0 {
+			fmt.Println(string(buf[:n]))
+			Write(buf[:n])
+		}
+	}
 }
 
 func Write(msg []byte) error {

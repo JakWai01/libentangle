@@ -24,8 +24,10 @@ var clientCmd = &cobra.Command{
 
 		for {
 			reader := bufio.NewReader(os.Stdin)
-			text, _ := reader.ReadString('\n')
-			networking.Write([]byte(text))
+			reader.ReadString('\n')
+
+			// Call own function here
+			networking.ReadWriter()
 
 		}
 	},

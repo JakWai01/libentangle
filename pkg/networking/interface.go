@@ -1,6 +1,7 @@
 package networking
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -50,6 +51,14 @@ func Connect(community string, f func(msg webrtc.DataChannelMessage)) {
 	}()
 }
 
+// Send EOF when finished
+// If this is a vulnerabilty and files could contain EOF, then just encode the content with base64
+
+type message struct {
+	Name    string `json:"name"`
+	Content []byte `json:"content"`
+}
+
 func ReadWriter() {
 	f, err := os.Open("test.txt")
 	if err != nil {
@@ -57,6 +66,13 @@ func ReadWriter() {
 	}
 	defer f.Close()
 	buf := make([]byte, 10)
+
+	BEGINNING_OF_FILE, err := json.Marshal(message{Name: "test.txt", Content: []byte("BOF")})
+	if err != nil {
+		panic(err)
+	}
+
+	Write(BEGINNING_OF_FILE)
 	for {
 		n, err := f.Read(buf)
 		if err == io.EOF {
@@ -68,9 +84,23 @@ func ReadWriter() {
 		}
 		if n > 0 {
 			fmt.Println(string(buf[:n]))
-			Write(buf[:n])
+
+			msg := message{Name: "test.txt", Content: buf[:n]}
+			// Send struct, each message contains the name of the file
+			bytes, err := json.Marshal(msg)
+			if err != nil {
+				panic(err)
+			}
+
+			Write(bytes)
 		}
 	}
+	END_OF_FILE, err := json.Marshal(message{Name: "test.txt", Content: []byte("EOF")})
+	if err != nil {
+		panic(err)
+	}
+
+	Write(END_OF_FILE)
 }
 
 func Write(msg []byte) error {

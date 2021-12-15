@@ -22,17 +22,14 @@ var clientCmd = &cobra.Command{
 	Short: "Start a signaling client.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		networking.Connect("test", func(msg webrtc.DataChannelMessage) {
+
+			// Call the Reader function which gets the msg.Data each time
 			log.Printf("Message: %s", msg.Data)
 
 			var f *os.File
 			var err error
 
-			type message struct {
-				Name    string `json:"name"`
-				Content []byte `json:"content"`
-			}
-
-			var file message
+			var file networking.Message
 
 			if err = json.Unmarshal(msg.Data, &file); err != nil {
 				panic(err)

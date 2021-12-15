@@ -38,7 +38,7 @@ var clientCmd = &cobra.Command{
 				panic(err)
 			}
 
-			f, err = os.OpenFile(file.Name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			f, err = os.OpenFile("output.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
 				panic(err)
 			}
@@ -62,8 +62,7 @@ var clientCmd = &cobra.Command{
 			reader := bufio.NewReader(os.Stdin)
 			reader.ReadString('\n')
 
-			// Call own function here
-			networking.ReadWriter()
+			networking.EntangledWriter("test.txt")
 
 		}
 	},

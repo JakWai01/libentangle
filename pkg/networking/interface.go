@@ -7,7 +7,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/alphahorizon/libentangle/pkg/signaling"
+	"github.com/alphahorizonio/libentangle/pkg/signaling"
 	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"
 )

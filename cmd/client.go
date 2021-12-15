@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/alphahorizon/libentangle/pkg/networking"
+	"github.com/alphahorizonio/libentangle/pkg/networking"
 	"github.com/pion/webrtc/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

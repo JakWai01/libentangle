@@ -51,7 +51,7 @@ func Connect(community string, f func(msg webrtc.DataChannelMessage)) {
 	}()
 }
 
-// Reads files and Writes them to all other peers in the same WebRTC community
+// Read file and send it to all other peers in the same WebRTC community
 func EntangledWriter(filename string) {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -94,20 +94,4 @@ func EntangledWriter(filename string) {
 	}
 
 	Write(END_OF_FILE)
-}
-
-func Write(msg []byte) error {
-	if manager != nil {
-		manager.SendMessage(msg)
-		return nil
-	}
-	return &NoConnectionEstablished{}
-}
-
-func WriteUnicast(msg []byte, mac string) error {
-	if manager != nil {
-		manager.SendMessageUnicast(msg, mac)
-		return nil
-	}
-	return &NoConnectionEstablished{}
 }

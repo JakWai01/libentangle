@@ -56,15 +56,16 @@ type message struct {
 	Content []byte `json:"content"`
 }
 
-func ReadWriter() {
-	f, err := os.Open("test.txt")
+// Reads files and Writes them to all other peers in the same WebRTC community
+func EntangledWriter(filename string) {
+	f, err := os.Open(filename)
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
-	buf := make([]byte, 10)
+	buf := make([]byte, 16000)
 
-	BEGINNING_OF_FILE, err := json.Marshal(message{Name: "test.txt", Content: []byte("BOF")})
+	BEGINNING_OF_FILE, err := json.Marshal(message{Name: filename, Content: []byte("BOF")})
 	if err != nil {
 		panic(err)
 	}
@@ -82,7 +83,7 @@ func ReadWriter() {
 		if n > 0 {
 			fmt.Println(string(buf[:n]))
 
-			msg := message{Name: "test.txt", Content: buf[:n]}
+			msg := message{Name: filename, Content: buf[:n]}
 
 			bytes, err := json.Marshal(msg)
 			if err != nil {
@@ -92,7 +93,7 @@ func ReadWriter() {
 			Write(bytes)
 		}
 	}
-	END_OF_FILE, err := json.Marshal(message{Name: "test.txt", Content: []byte("EOF")})
+	END_OF_FILE, err := json.Marshal(message{Name: filename, Content: []byte("EOF")})
 	if err != nil {
 		panic(err)
 	}

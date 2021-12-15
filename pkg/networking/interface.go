@@ -51,11 +51,6 @@ func Connect(community string, f func(msg webrtc.DataChannelMessage)) {
 	}()
 }
 
-type message struct {
-	Name    string `json:"name"`
-	Content []byte `json:"content"`
-}
-
 // Reads files and Writes them to all other peers in the same WebRTC community
 func EntangledWriter(filename string) {
 	f, err := os.Open(filename)
@@ -65,7 +60,7 @@ func EntangledWriter(filename string) {
 	defer f.Close()
 	buf := make([]byte, 16000)
 
-	BEGINNING_OF_FILE, err := json.Marshal(message{Name: filename, Content: []byte("BOF")})
+	BEGINNING_OF_FILE, err := json.Marshal(Message{Name: filename, Content: []byte("BOF")})
 	if err != nil {
 		panic(err)
 	}
@@ -83,7 +78,7 @@ func EntangledWriter(filename string) {
 		if n > 0 {
 			fmt.Println(string(buf[:n]))
 
-			msg := message{Name: filename, Content: buf[:n]}
+			msg := Message{Name: filename, Content: buf[:n]}
 
 			bytes, err := json.Marshal(msg)
 			if err != nil {
@@ -93,7 +88,7 @@ func EntangledWriter(filename string) {
 			Write(bytes)
 		}
 	}
-	END_OF_FILE, err := json.Marshal(message{Name: filename, Content: []byte("EOF")})
+	END_OF_FILE, err := json.Marshal(Message{Name: filename, Content: []byte("EOF")})
 	if err != nil {
 		panic(err)
 	}

@@ -5,8 +5,8 @@ import (
 	"net"
 	"net/http"
 
-	api "github.com/alphahorizon/libentangle/pkg/api/websockets/v1"
-	"github.com/alphahorizon/libentangle/pkg/signaling"
+	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
+	"github.com/alphahorizonio/libentangle/pkg/signaling"
 	"github.com/spf13/cobra"
 	"nhooyr.io/websocket"
 )

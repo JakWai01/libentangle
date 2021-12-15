@@ -1,4 +1,4 @@
-module github.com/alphahorizon/libentangle
+module github.com/alphahorizonio/libentangle
 
 go 1.16
 

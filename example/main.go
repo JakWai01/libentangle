@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/alphahorizon/libentangle/pkg/networking"
+	"github.com/alphahorizonio/libentangle/pkg/networking"
 	"github.com/pion/webrtc/v3"
 )
 

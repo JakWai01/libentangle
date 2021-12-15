@@ -9,7 +9,7 @@ import (
 	"sync"
 	"syscall"
 
-	api "github.com/alphahorizon/libentangle/pkg/api/websockets/v1"
+	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
 	"github.com/google/uuid"
 	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"

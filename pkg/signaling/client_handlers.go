@@ -7,7 +7,7 @@ import (
 	"log"
 	"sync"
 
-	api "github.com/alphahorizon/libentangle/pkg/api/websockets/v1"
+	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
 	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"

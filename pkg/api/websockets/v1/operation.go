@@ -55,6 +55,40 @@ type Resignation struct {
 	Mac string `json:"mac"`
 }
 
+type ReadOp struct {
+	Message
+	Payload []byte `json:"payload"`
+}
+
+type WriteOp struct {
+	Message
+	Payload []byte `json:"payload"`
+}
+
+type SeekOp struct {
+	Message
+	Offset int64 `json:"offset"`
+	Whence int   `json:"whence"`
+}
+
+type ReadOpResponse struct {
+	Message
+	BytesRead int    `json:"bytesread"`
+	Error     string `json:"error"`
+}
+
+type WriteOpResponse struct {
+	Message
+	BytesRead int64  `json:"bytesread"`
+	Error     string `json:"error"`
+}
+
+type SeekOpResponse struct {
+	Message
+	Offset int64  `json:"offset"`
+	Error  string `json:"error"`
+}
+
 func NewApplication(community string, mac string) *Application {
 	return &Application{Message: Message{OpcodeApplication}, Community: community, Mac: mac}
 }
@@ -93,4 +127,28 @@ func NewExited(mac string) *Exited {
 
 func NewResignation(mac string) *Resignation {
 	return &Resignation{Message: Message{OpcodeResignation}, Mac: mac}
+}
+
+func NewReadOp(payload []byte) *ReadOp {
+	return &ReadOp{Message: Message{OpcodeRead}, Payload: payload}
+}
+
+func NewWriteOp(payload []byte) *WriteOp {
+	return &WriteOp{Message: Message{OpcodeWrite}, Payload: payload}
+}
+
+func NewSeekOp(offset int64, whence int) *SeekOp {
+	return &SeekOp{Message: Message{OpcodeSeek}, Offset: offset, Whence: whence}
+}
+
+func NewReadOpResponse(bytesread int, err string) *ReadOpResponse {
+	return &ReadOpResponse{Message: Message{OpcodeReadResponse}, BytesRead: bytesread, Error: err}
+}
+
+func NewWriteOpResponse(bytesread int64, err string) *WriteOpResponse {
+	return &WriteOpResponse{Message: Message{OpcodeWriteResponse}, BytesRead: bytesread, Error: err}
+}
+
+func NewSeekOpResponse(offset int64, err string) *SeekOpResponse {
+	return &SeekOpResponse{Message: Message{OpcodeSeekResponse}, Offset: offset, Error: err}
 }

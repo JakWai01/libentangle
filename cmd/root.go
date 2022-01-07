@@ -4,6 +4,11 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
+
+const (
+	communityKey = "community"
 )
 
 var rootCmd = &cobra.Command{
@@ -15,6 +20,16 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
+
+	rootCmd.PersistentFlags().String(communityKey, "testCommunityName", "Community to join")
+
+	// Bind env variables
+	if err := viper.BindPFlags(serverCmd.PersistentFlags()); err != nil {
+		log.Fatal("could not bind flags:", err)
+	}
+
+	viper.AutomaticEnv()
+
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
@@ -23,4 +38,5 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(signalCmd)
 	rootCmd.AddCommand(clientCmd)
+	rootCmd.AddCommand(serverCmd)
 }

@@ -2,19 +2,16 @@ package cmd
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
+	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
 	"github.com/alphahorizonio/libentangle/pkg/networking"
 	"github.com/pion/webrtc/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-)
-
-const (
-	communityKey = "community"
 )
 
 var clientCmd = &cobra.Command{
@@ -23,44 +20,49 @@ var clientCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		networking.Connect("test", func(msg webrtc.DataChannelMessage) {
 
-			// Call the Reader function which gets the msg.Data each time
-			log.Printf("Message: %s", msg.Data)
+			// Handle client messages
+			fmt.Println(string(msg.Data))
 
-			var f *os.File
-			var err error
+			var v api.Message
 
-			var file networking.Message
-
-			if err = json.Unmarshal(msg.Data, &file); err != nil {
+			if err := json.Unmarshal(msg.Data, &v); err != nil {
 				panic(err)
 			}
 
-			f, err = os.OpenFile("output.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			switch v.Opcode {
+			case api.OpcodeReadResponse:
+				var readOpResponse api.ReadOp
+				if err := json.Unmarshal(msg.Data, &readOpResponse); err != nil {
+					panic(err)
+				}
+
+				break
+			case api.OpcodeWriteResponse:
+				var writeOpResponse api.WriteOp
+				if err := json.Unmarshal(msg.Data, &writeOpResponse); err != nil {
+					panic(err)
+				}
+
+				break
+			case api.OpcodeSeekResponse:
+				var seekOpResponse api.SeekOp
+				if err := json.Unmarshal(msg.Data, &seekOpResponse); err != nil {
+					panic(err)
+				}
+
+				break
+			}
+		})
+
+		// This can be replaced by a select{}, since the messages are sent by the ReadWriteSeeker
+		for {
+			reader := bufio.NewReader(os.Stdin)
+			msg, err := reader.ReadString('\n')
 			if err != nil {
 				panic(err)
 			}
-			defer f.Close()
 
-			if bytes.Equal(file.Content, []byte("BOF")) {
-				f.Truncate(0)
-				f.Seek(0, 0)
-			} else if bytes.Equal(file.Content, []byte("EOF")) {
-				return
-			} else {
-				_, err := f.Write(file.Content)
-				if err != nil {
-					panic(err)
-				}
-			}
-
-		})
-
-		for {
-			reader := bufio.NewReader(os.Stdin)
-			reader.ReadString('\n')
-
-			networking.EntangledWriter("test.txt")
-
+			networking.Write([]byte(msg))
 		}
 	},
 }

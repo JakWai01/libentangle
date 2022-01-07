@@ -11,4 +11,12 @@ const (
 	OpcodeCandidate    = "candidate"
 	OpcodeExited       = "exited"
 	OpcodeResignation  = "resignation"
+
+	OpcodeRead  = "read"
+	OpcodeWrite = "write"
+	OpcodeSeek  = "seek"
+
+	OpcodeReadResponse  = "readresponse"
+	OpcodeWriteResponse = "writeresponse"
+	OpcodeSeekResponse  = "seekresponse"
 )

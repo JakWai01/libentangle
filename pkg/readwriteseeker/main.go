@@ -21,12 +21,12 @@ type RemoteFile struct {
 	ReadCh  chan api.ReadOpResponse
 	WriteCh chan api.WriteOpResponse
 	SeekCh  chan api.SeekOpResponse
-	OpenCh  chan api.OpenOpResponse
 	CloseCh chan api.CloseOpResponse
 }
 
-// Not returning a file here
-func (f *RemoteFile) Open(name string) error {
+var OpenCh chan api.OpenOpResponse
+
+func Open(name string) (*RemoteFile, error) {
 
 	msg, err := json.Marshal(api.NewOpenOp(name))
 	if err != nil {
@@ -35,10 +35,14 @@ func (f *RemoteFile) Open(name string) error {
 
 	networking.WriteToDataChannel(msg)
 
-	response := <-f.OpenCh
+	response := <-OpenCh
 
-	// Is it right to just return the pointer to RemoteFile?
-	return checkError(response.Error)
+	return &RemoteFile{
+		ReadCh:  make(chan api.ReadOpResponse),
+		WriteCh: make(chan api.WriteOpResponse),
+		SeekCh:  make(chan api.SeekOpResponse),
+		CloseCh: make(chan api.CloseOpResponse),
+	}, checkError(response.Error)
 }
 
 func (f *RemoteFile) Close() error {
@@ -67,6 +71,8 @@ func (f *RemoteFile) Read(n []byte) (int, error) {
 	networking.WriteToDataChannel(msg)
 
 	response := <-f.ReadCh
+
+	copy(n, response.Bytes)
 
 	return int(response.BytesRead), checkError(response.Error)
 }

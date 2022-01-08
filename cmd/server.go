@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -18,9 +17,11 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Start a signaling client acting as a server after connecting",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var file *os.File
+		var err error
+
 		networking.Connect("test", func(msg webrtc.DataChannelMessage) {
 
-			// Handle server messages
 			fmt.Println(string(msg.Data))
 
 			var v api.Message
@@ -30,21 +31,80 @@ var serverCmd = &cobra.Command{
 			}
 
 			switch v.Opcode {
+			case api.OpcodeOpen:
+				// Lock
+				var openOp api.OpenOp
+				if err := json.Unmarshal(msg.Data, &openOp); err != nil {
+					panic(err)
+				}
+
+				file, err = os.OpenFile(openOp.Name, os.O_CREATE|os.O_RDWR, os.ModePerm)
+				if err != nil {
+					msg, err := json.Marshal(api.NewOpenOpResponse(err.Error()))
+					if err != nil {
+						panic(err)
+					}
+
+					networking.WriteToDataChannel(msg)
+				} else {
+					msg, err := json.Marshal(api.NewOpenOpResponse(""))
+					if err != nil {
+						panic(err)
+					}
+
+					networking.WriteToDataChannel(msg)
+				}
+
+				break
+			case api.OpcodeClose:
+				// Unlock
+				var closeOp api.CloseOp
+				if err := json.Unmarshal(msg.Data, &closeOp); err != nil {
+					panic(err)
+				}
+
+				err := file.Close()
+				if err != nil {
+					msg, err := json.Marshal(api.NewCloseOpResponse(err.Error()))
+					if err != nil {
+						panic(err)
+					}
+
+					networking.WriteToDataChannel(msg)
+				} else {
+					msg, err := json.Marshal(api.NewCloseOpResponse(""))
+					if err != nil {
+						panic(err)
+					}
+
+					networking.WriteToDataChannel(msg)
+				}
+
+				break
 			case api.OpcodeRead:
 				var readOp api.ReadOp
 				if err := json.Unmarshal(msg.Data, &readOp); err != nil {
 					panic(err)
 				}
 
-				// Call stfs functions using the right parameters here and send answer structs
-				n, err := os.Stderr.Write([]byte("stfs"))
+				buf := make([]byte, readOp.Length)
 
-				msg, err := json.Marshal(api.NewReadOpResponse(n, err.Error()))
+				n, err := file.Read(buf)
 				if err != nil {
-					panic(err)
-				}
+					msg, err := json.Marshal(api.NewReadOpResponse(buf, int64(n), err.Error()))
+					if err != nil {
+						panic(err)
+					}
 
-				networking.WriteToDataChannel(msg)
+					networking.WriteToDataChannel(msg)
+				} else {
+					msg, err := json.Marshal(api.NewReadOpResponse(buf, int64(n), ""))
+					if err != nil {
+						panic(err)
+					}
+
+					networking.WriteToDataChannel(msg)
+				}
 
 				break
 			case api.OpcodeWrite:
@@ -53,15 +113,22 @@ var serverCmd = &cobra.Command{
 					panic(err)
 				}
 
-				// Call stfs functions using the right parameters here and send answer structs
-				n, err := os.Stderr.Write([]byte("stfs"))
-
-				msg, err := json.Marshal(api.NewWriteOpResponse(int64(n), err.Error()))
+				n, err := file.Write(writeOp.Payload)
 				if err != nil {
-					panic(err)
-				}
+					msg, err := json.Marshal(api.NewWriteOpResponse(int64(n), err.Error()))
+					if err != nil {
+						panic(err)
+					}
 
-				networking.WriteToDataChannel(msg)
+					networking.WriteToDataChannel(msg)
+				} else {
+					msg, err := json.Marshal(api.NewWriteOpResponse(int64(n), ""))
+					if err != nil {
+						panic(err)
+					}
+
+					networking.WriteToDataChannel(msg)
+				}
 
 				break
 			case api.OpcodeSeek:
@@ -70,30 +137,28 @@ var serverCmd = &cobra.Command{
 					panic(err)
 				}
 
-				// Call stfs functions using the right parameters here and send answer structs
-				n, err := os.Stderr.Seek(1, 2)
-
-				msg, err := json.Marshal(api.NewSeekOpResponse(n, err.Error()))
+				offset, err := file.Seek(seekOp.Offset, seekOp.Whence)
 				if err != nil {
-					panic(err)
-				}
+					msg, err := json.Marshal(api.NewSeekOpResponse(offset, err.Error()))
+					if err != nil {
+						panic(err)
+					}
 
-				networking.WriteToDataChannel(msg)
+					networking.WriteToDataChannel(msg)
+				} else {
+					msg, err := json.Marshal(api.NewSeekOpResponse(offset, ""))
+					if err != nil {
+						panic(err)
+					}
+
+					networking.WriteToDataChannel(msg)
+				}
 
 				break
 			}
 		})
 
-		// This can be replaced by a select{}, since the messages are sent by the ReadWriteSeeker
-		for {
-			reader := bufio.NewReader(os.Stdin)
-			msg, err := reader.ReadString('\n')
-			if err != nil {
-				panic(err)
-			}
-
-			networking.Write([]byte(msg))
-		}
+		select {}
 	},
 }
 

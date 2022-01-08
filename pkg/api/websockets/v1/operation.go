@@ -57,7 +57,7 @@ type Resignation struct {
 
 type ReadOp struct {
 	Message
-	Payload []byte `json:"payload"`
+	Length int `json:"length"`
 }
 
 type WriteOp struct {
@@ -71,9 +71,19 @@ type SeekOp struct {
 	Whence int   `json:"whence"`
 }
 
+type OpenOp struct {
+	Message
+	Name string `json:"name"`
+}
+
+type CloseOp struct {
+	Message
+}
+
 type ReadOpResponse struct {
 	Message
-	BytesRead int    `json:"bytesread"`
+	Bytes     []byte `json:"bytes"`
+	BytesRead int64  `json:"bytesread"`
 	Error     string `json:"error"`
 }
 
@@ -87,6 +97,17 @@ type SeekOpResponse struct {
 	Message
 	Offset int64  `json:"offset"`
 	Error  string `json:"error"`
+}
+
+// We are missing a field here
+type OpenOpResponse struct {
+	Message
+	Error string `json:"error"`
+}
+
+type CloseOpResponse struct {
+	Message
+	Error string `json:"error"`
 }
 
 func NewApplication(community string, mac string) *Application {
@@ -129,8 +150,8 @@ func NewResignation(mac string) *Resignation {
 	return &Resignation{Message: Message{OpcodeResignation}, Mac: mac}
 }
 
-func NewReadOp(payload []byte) *ReadOp {
-	return &ReadOp{Message: Message{OpcodeRead}, Payload: payload}
+func NewReadOp(length int) *ReadOp {
+	return &ReadOp{Message: Message{OpcodeRead}, Length: length}
 }
 
 func NewWriteOp(payload []byte) *WriteOp {
@@ -141,8 +162,16 @@ func NewSeekOp(offset int64, whence int) *SeekOp {
 	return &SeekOp{Message: Message{OpcodeSeek}, Offset: offset, Whence: whence}
 }
 
-func NewReadOpResponse(bytesread int, err string) *ReadOpResponse {
-	return &ReadOpResponse{Message: Message{OpcodeReadResponse}, BytesRead: bytesread, Error: err}
+func NewOpenOp(name string) *OpenOp {
+	return &OpenOp{Message: Message{OpcodeOpen}, Name: name}
+}
+
+func NewCloseOp() *CloseOp {
+	return &CloseOp{Message: Message{OpcodeClose}}
+}
+
+func NewReadOpResponse(bytes []byte, bytesread int64, err string) *ReadOpResponse {
+	return &ReadOpResponse{Message: Message{OpcodeReadResponse}, Bytes: bytes, BytesRead: bytesread, Error: err}
 }
 
 func NewWriteOpResponse(bytesread int64, err string) *WriteOpResponse {
@@ -151,4 +180,12 @@ func NewWriteOpResponse(bytesread int64, err string) *WriteOpResponse {
 
 func NewSeekOpResponse(offset int64, err string) *SeekOpResponse {
 	return &SeekOpResponse{Message: Message{OpcodeSeekResponse}, Offset: offset, Error: err}
+}
+
+func NewOpenOpResponse(err string) *OpenOpResponse {
+	return &OpenOpResponse{Message: Message{OpcodeOpenResponse}, Error: err}
+}
+
+func NewCloseOpResponse(err string) *CloseOpResponse {
+	return &CloseOpResponse{Message: Message{OpcodeCloseResponse}, Error: err}
 }

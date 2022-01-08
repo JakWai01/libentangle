@@ -1,14 +1,13 @@
 package cmd
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
 	"github.com/alphahorizonio/libentangle/pkg/networking"
+	"github.com/alphahorizonio/libentangle/pkg/readwriteseeker"
 	"github.com/pion/webrtc/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -18,9 +17,17 @@ var clientCmd = &cobra.Command{
 	Use:   "client",
 	Short: "Start a signaling client.",
 	RunE: func(cmd *cobra.Command, args []string) error {
+
+		rmFile := readwriteseeker.RemoteFile{
+			ReadCh:  make(chan api.ReadOpResponse),
+			WriteCh: make(chan api.WriteOpResponse),
+			SeekCh:  make(chan api.SeekOpResponse),
+			OpenCh:  make(chan api.OpenOpResponse),
+			CloseCh: make(chan api.CloseOpResponse),
+		}
+
 		networking.Connect("test", func(msg webrtc.DataChannelMessage) {
 
-			// Handle client messages
 			fmt.Println(string(msg.Data))
 
 			var v api.Message
@@ -30,40 +37,55 @@ var clientCmd = &cobra.Command{
 			}
 
 			switch v.Opcode {
+			case api.OpcodeOpenResponse:
+				var openOpResponse api.OpenOpResponse
+				if err := json.Unmarshal(msg.Data, &openOpResponse); err != nil {
+					panic(err)
+				}
+
+				rmFile.OpenCh <- openOpResponse
+
+				break
+			case api.OpcodeCloseResponse:
+				var closeOpResponse api.CloseOpResponse
+				if err := json.Unmarshal(msg.Data, &closeOpResponse); err != nil {
+					panic(err)
+				}
+
+				rmFile.CloseCh <- closeOpResponse
+
+				break
 			case api.OpcodeReadResponse:
-				var readOpResponse api.ReadOp
+				var readOpResponse api.ReadOpResponse
 				if err := json.Unmarshal(msg.Data, &readOpResponse); err != nil {
 					panic(err)
 				}
 
+				rmFile.ReadCh <- readOpResponse
+
 				break
 			case api.OpcodeWriteResponse:
-				var writeOpResponse api.WriteOp
+				var writeOpResponse api.WriteOpResponse
 				if err := json.Unmarshal(msg.Data, &writeOpResponse); err != nil {
 					panic(err)
 				}
 
+				rmFile.WriteCh <- writeOpResponse
+
 				break
 			case api.OpcodeSeekResponse:
-				var seekOpResponse api.SeekOp
+				var seekOpResponse api.SeekOpResponse
 				if err := json.Unmarshal(msg.Data, &seekOpResponse); err != nil {
 					panic(err)
 				}
+
+				rmFile.SeekCh <- seekOpResponse
 
 				break
 			}
 		})
 
-		// This can be replaced by a select{}, since the messages are sent by the ReadWriteSeeker
-		for {
-			reader := bufio.NewReader(os.Stdin)
-			msg, err := reader.ReadString('\n')
-			if err != nil {
-				panic(err)
-			}
-
-			networking.Write([]byte(msg))
-		}
+		select {}
 	},
 }
 

@@ -1,5 +1,5 @@
 package readwriteseeker
 
 const (
-	NoneKey = "none"
+	NoneKey = ""
 )

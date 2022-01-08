@@ -18,12 +18,9 @@ var clientCmd = &cobra.Command{
 	Short: "Start a signaling client.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		rmFile := readwriteseeker.RemoteFile{
-			ReadCh:  make(chan api.ReadOpResponse),
-			WriteCh: make(chan api.WriteOpResponse),
-			SeekCh:  make(chan api.SeekOpResponse),
-			OpenCh:  make(chan api.OpenOpResponse),
-			CloseCh: make(chan api.CloseOpResponse),
+		f, err := readwriteseeker.Open("filename")
+		if err != nil {
+			panic(err)
 		}
 
 		networking.Connect("test", func(msg webrtc.DataChannelMessage) {
@@ -43,7 +40,7 @@ var clientCmd = &cobra.Command{
 					panic(err)
 				}
 
-				rmFile.OpenCh <- openOpResponse
+				readwriteseeker.OpenCh <- openOpResponse
 
 				break
 			case api.OpcodeCloseResponse:
@@ -52,7 +49,7 @@ var clientCmd = &cobra.Command{
 					panic(err)
 				}
 
-				rmFile.CloseCh <- closeOpResponse
+				f.CloseCh <- closeOpResponse
 
 				break
 			case api.OpcodeReadResponse:
@@ -61,7 +58,7 @@ var clientCmd = &cobra.Command{
 					panic(err)
 				}
 
-				rmFile.ReadCh <- readOpResponse
+				f.ReadCh <- readOpResponse
 
 				break
 			case api.OpcodeWriteResponse:
@@ -70,7 +67,7 @@ var clientCmd = &cobra.Command{
 					panic(err)
 				}
 
-				rmFile.WriteCh <- writeOpResponse
+				f.WriteCh <- writeOpResponse
 
 				break
 			case api.OpcodeSeekResponse:
@@ -79,7 +76,7 @@ var clientCmd = &cobra.Command{
 					panic(err)
 				}
 
-				rmFile.SeekCh <- seekOpResponse
+				f.SeekCh <- seekOpResponse
 
 				break
 			}
@@ -92,7 +89,6 @@ var clientCmd = &cobra.Command{
 func init() {
 	clientCmd.PersistentFlags().String(communityKey, "testCommunityName", "Community to join")
 
-	// Bind env variables
 	if err := viper.BindPFlags(clientCmd.PersistentFlags()); err != nil {
 		log.Fatal("could not bind flags:", err)
 	}

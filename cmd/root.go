@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -9,6 +12,8 @@ import (
 
 const (
 	communityKey = "community"
+	verboseFlag  = "verbose"
+	metadataFlag = "metadata"
 )
 
 var rootCmd = &cobra.Command{
@@ -19,10 +24,17 @@ var rootCmd = &cobra.Command{
 	For more information, please visit https://github.com/alphahorizon/libentangle`,
 }
 
-func Execute() {
+func Execute() error {
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	metadataPath := filepath.Join(home, ".local", "share", "stfs", "var", "lib", "stfs", "metadata.sqlite")
 
 	rootCmd.PersistentFlags().String(communityKey, "testCommunityName", "Community to join")
-
+	rootCmd.PersistentFlags().IntP(verboseFlag, "v", 2, fmt.Sprintf("Verbosity level (default %v)", 2))
+	rootCmd.PersistentFlags().StringP(metadataFlag, "m", metadataPath, "Metadata database to use")
 	// Bind env variables
 	if err := viper.BindPFlags(serverCmd.PersistentFlags()); err != nil {
 		log.Fatal("could not bind flags:", err)
@@ -30,13 +42,12 @@ func Execute() {
 
 	viper.AutomaticEnv()
 
-	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err)
-	}
+	return rootCmd.Execute()
 }
 
 func init() {
 	rootCmd.AddCommand(signalCmd)
 	rootCmd.AddCommand(clientCmd)
 	rootCmd.AddCommand(serverCmd)
+	rootCmd.AddCommand(exampleCmd)
 }

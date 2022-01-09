@@ -18,8 +18,8 @@ func (m *NoConnectionEstablished) Error() string {
 	return "No connection established so far. Either the Connect() has not been called yet or the connection was still in the making"
 }
 
-func Connect(community string, f func(msg webrtc.DataChannelMessage)) {
-	manager = signaling.NewClientManager()
+func Connect(community string, f func(msg webrtc.DataChannelMessage), onConnected func()) {
+	manager = signaling.NewClientManager(onConnected)
 
 	client := signaling.NewSignalingClient(
 		func(conn *websocket.Conn, uuid string) error {
@@ -47,52 +47,6 @@ func Connect(community string, f func(msg webrtc.DataChannelMessage)) {
 	}()
 }
 
-// Read file and send it to all other peers in the same WebRTC community
-// func EntangledWriter(filename string) {
-// 	f, err := os.Open(filename)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	defer f.Close()
-// 	buf := make([]byte, 16000)
-
-// 	BEGINNING_OF_FILE, err := json.Marshal(Message{Name: filename, Content: []byte("BOF")})
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	Write(BEGINNING_OF_FILE)
-// 	for {
-// 		n, err := f.Read(buf)
-// 		if err == io.EOF {
-// 			break
-// 		}
-// 		if err != nil {
-// 			fmt.Println(err)
-// 			break
-// 		}
-// 		if n > 0 {
-// 			fmt.Println(string(buf[:n]))
-
-// 			msg := Message{Name: filename, Content: buf[:n]}
-
-// 			bytes, err := json.Marshal(msg)
-// 			if err != nil {
-// 				panic(err)
-// 			}
-
-// 			Write(bytes)
-// 		}
-// 	}
-// 	END_OF_FILE, err := json.Marshal(Message{Name: filename, Content: []byte("EOF")})
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	Write(END_OF_FILE)
-// }
-
-// If the stfs write function does not chunk by default, we need to chunk here
 func WriteToDataChannel(p []byte) (int, error) {
 	if err := Write(p); err != nil {
 		return 0, err

@@ -36,7 +36,7 @@ func Execute() error {
 	rootCmd.PersistentFlags().IntP(verboseFlag, "v", 2, fmt.Sprintf("Verbosity level (default %v)", 2))
 	rootCmd.PersistentFlags().StringP(metadataFlag, "m", metadataPath, "Metadata database to use")
 	// Bind env variables
-	if err := viper.BindPFlags(serverCmd.PersistentFlags()); err != nil {
+	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {
 		log.Fatal("could not bind flags:", err)
 	}
 
@@ -47,7 +47,5 @@ func Execute() error {
 
 func init() {
 	rootCmd.AddCommand(signalCmd)
-	rootCmd.AddCommand(clientCmd)
 	rootCmd.AddCommand(serverCmd)
-	rootCmd.AddCommand(exampleCmd)
 }

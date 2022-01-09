@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/alphahorizonio/libentangle/pkg/networking"
 	"github.com/pion/webrtc/v3"
@@ -18,11 +19,18 @@ var serverCmd = &cobra.Command{
 	Short: "Start a signaling client acting as a server after connecting",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var file *os.File
-		var err error
+
+		onOpen := make(chan struct{})
+		dir, err := os.MkdirTemp(os.TempDir(), "serverfiles-*")
+		if err != nil {
+			panic(err)
+		}
+
+		myFile := filepath.Join(dir, "serverfile.tar")
 
 		networking.Connect("test", func(msg webrtc.DataChannelMessage) {
 
-			fmt.Println(string(msg.Data))
+			log.Println(string(msg.Data))
 
 			var v api.Message
 
@@ -37,22 +45,41 @@ var serverCmd = &cobra.Command{
 				if err := json.Unmarshal(msg.Data, &openOp); err != nil {
 					panic(err)
 				}
-
-				file, err = os.OpenFile(openOp.Name, os.O_CREATE|os.O_RDWR, os.ModePerm)
-				if err != nil {
-					msg, err := json.Marshal(api.NewOpenOpResponse(err.Error()))
+				log.Println(openOp.ReadOnly)
+				if openOp.ReadOnly == true {
+					file, err = os.Open(myFile)
 					if err != nil {
-						panic(err)
-					}
+						msg, err := json.Marshal(api.NewOpenOpResponse(err.Error()))
+						if err != nil {
+							panic(err)
+						}
 
-					networking.WriteToDataChannel(msg)
+						networking.WriteToDataChannel(msg)
+					} else {
+						msg, err := json.Marshal(api.NewOpenOpResponse(""))
+						if err != nil {
+							panic(err)
+						}
+
+						networking.WriteToDataChannel(msg)
+					}
 				} else {
-					msg, err := json.Marshal(api.NewOpenOpResponse(""))
+					file, err = os.OpenFile(myFile, os.O_CREATE|os.O_RDWR, os.ModePerm)
 					if err != nil {
-						panic(err)
-					}
+						msg, err := json.Marshal(api.NewOpenOpResponse(err.Error()))
+						if err != nil {
+							panic(err)
+						}
 
-					networking.WriteToDataChannel(msg)
+						networking.WriteToDataChannel(msg)
+					} else {
+						msg, err := json.Marshal(api.NewOpenOpResponse(""))
+						if err != nil {
+							panic(err)
+						}
+
+						networking.WriteToDataChannel(msg)
+					}
 				}
 
 				break
@@ -63,22 +90,28 @@ var serverCmd = &cobra.Command{
 					panic(err)
 				}
 
-				err := file.Close()
+				file.Close()
+				// if err != nil {
+				// 	msg, err := json.Marshal(api.NewCloseOpResponse(err.Error()))
+				// 	if err != nil {
+				// 		panic(err)
+				// 	}
+
+				// 	networking.WriteToDataChannel(msg)
+				// } else {
+				// 	msg, err := json.Marshal(api.NewCloseOpResponse(""))
+				// 	if err != nil {
+				// 		panic(err)
+				// 	}
+
+				// 	networking.WriteToDataChannel(msg)
+				// }
+				msg, err := json.Marshal(api.NewCloseOpResponse(""))
 				if err != nil {
-					msg, err := json.Marshal(api.NewCloseOpResponse(err.Error()))
-					if err != nil {
-						panic(err)
-					}
-
-					networking.WriteToDataChannel(msg)
-				} else {
-					msg, err := json.Marshal(api.NewCloseOpResponse(""))
-					if err != nil {
-						panic(err)
-					}
-
-					networking.WriteToDataChannel(msg)
+					panic(err)
 				}
+
+				networking.WriteToDataChannel(msg)
 
 				break
 			case api.OpcodeRead:
@@ -156,7 +189,11 @@ var serverCmd = &cobra.Command{
 
 				break
 			}
+		}, func() {
+			onOpen <- struct{}{}
 		})
+
+		<-onOpen
 
 		select {}
 	},

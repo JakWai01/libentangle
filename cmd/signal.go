@@ -19,7 +19,7 @@ var signalCmd = &cobra.Command{
 		for {
 			addr, err := net.ResolveTCPAddr("tcp", "localhost:9090")
 			if err != nil {
-				log.Fatal(err)
+				panic(err)
 			}
 
 			log.Printf("signaling server listening on %v", addr)
@@ -52,7 +52,7 @@ var signalCmd = &cobra.Command{
 					InsecureSkipVerify: true, // CORS
 				})
 				if err != nil {
-					log.Fatal(err)
+					panic(err)
 				}
 
 				log.Println("client connected")

@@ -73,7 +73,7 @@ type SeekOp struct {
 
 type OpenOp struct {
 	Message
-	Name string `json:"name"`
+	ReadOnly bool
 }
 
 type CloseOp struct {
@@ -162,8 +162,8 @@ func NewSeekOp(offset int64, whence int) *SeekOp {
 	return &SeekOp{Message: Message{OpcodeSeek}, Offset: offset, Whence: whence}
 }
 
-func NewOpenOp(name string) *OpenOp {
-	return &OpenOp{Message: Message{OpcodeOpen}, Name: name}
+func NewOpenOp(readOnly bool) *OpenOp {
+	return &OpenOp{Message: Message{OpcodeOpen}, ReadOnly: readOnly}
 }
 
 func NewCloseOp() *CloseOp {

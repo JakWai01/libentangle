@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	networking.Connect("test", func(msg webrtc.DataChannelMessage) { log.Printf("Message: %s", msg.Data) })
+	networking.Connect("test", func(msg webrtc.DataChannelMessage) { log.Printf("Message: %s", msg.Data) }, func() {})
 
 	for {
 		reader := bufio.NewReader(os.Stdin)

@@ -19,6 +19,7 @@ import (
 	"github.com/pojntfx/stfs/pkg/persisters"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
 	"github.com/alphahorizonio/libentangle/pkg/networking"
@@ -37,7 +38,8 @@ var exampleCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		l := logging.NewJSONLogger(viper.GetInt(verboseFlag))
-
+		boil.DebugMode = true
+		boil.DebugWriter = os.Stderr
 		// tm := tape.NewTapeManager(
 		// 	viper.GetString(driveFlag),
 		// 	viper.GetInt(recordSizeFlag),

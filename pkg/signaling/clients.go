@@ -3,7 +3,6 @@ package signaling
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"os"
 	"os/signal"
 	"sync"
@@ -53,7 +52,7 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, f fun
 	wsAddress := "ws://" + laddrKey
 	conn, _, error := websocket.Dial(context.Background(), wsAddress, nil)
 	if error != nil {
-		log.Fatal(error)
+		panic(error)
 	}
 	defer conn.Close(websocket.StatusNormalClosure, "Closing websocket connection nominally")
 
@@ -63,7 +62,7 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, f fun
 
 	go func() {
 		if err := wsjson.Write(context.Background(), conn, api.NewApplication(communityKey, uuid)); err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 
 		c := make(chan os.Signal)
@@ -72,7 +71,7 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, f fun
 			<-c
 
 			if err := wsjson.Write(context.Background(), conn, api.NewExited(uuid)); err != nil {
-				log.Fatal(err)
+				panic(err)
 			}
 
 			return
@@ -84,12 +83,12 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, f fun
 		for {
 			_, data, err := conn.Read(context.Background())
 			if err != nil {
-				log.Fatal(err)
+				panic(err)
 			}
 
 			var v api.Message
 			if err := json.Unmarshal(data, &v); err != nil {
-				log.Fatal(err)
+				panic(err)
 			}
 
 			switch v.Opcode {
@@ -115,7 +114,7 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, f fun
 	}()
 	<-exitClient
 	if err := wsjson.Write(context.Background(), conn, api.NewExited(uuid)); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return result
 }

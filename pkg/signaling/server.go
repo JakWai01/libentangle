@@ -3,7 +3,6 @@ package signaling
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
@@ -46,61 +45,61 @@ func (s *SignalingServer) HandleConn(conn websocket.Conn) {
 		for {
 			_, data, err := conn.Read(context.Background())
 			if err != nil {
-				log.Fatal(err)
+				panic(err)
 			}
 
 			var v api.Message
 			if err := json.Unmarshal(data, &v); err != nil {
-				log.Fatal(err)
+				panic(err)
 			}
 
-			fmt.Println(v)
+			log.Println(v)
 
 			switch v.Opcode {
 			case api.OpcodeApplication:
 				var application api.Application
 				if err := json.Unmarshal(data, &application); err != nil {
-					log.Fatal(err)
+					panic(err)
 				}
 				s.onApplication(application, &conn)
 				break
 			case api.OpcodeReady:
 				var ready api.Ready
 				if err := json.Unmarshal(data, &ready); err != nil {
-					log.Fatal(err)
+					panic(err)
 				}
 				s.onReady(ready, &conn)
 				break
 			case api.OpcodeOffer:
 				var offer api.Offer
 				if err := json.Unmarshal(data, &offer); err != nil {
-					log.Fatal(err)
+					panic(err)
 				}
 				s.onOffer(offer)
 				break
 			case api.OpcodeAnswer:
 				var answer api.Answer
 				if err := json.Unmarshal(data, &answer); err != nil {
-					log.Fatal(err)
+					panic(err)
 				}
 				s.onAnswer(answer)
 				break
 			case api.OpcodeCandidate:
 				var candidate api.Candidate
 				if err := json.Unmarshal(data, &candidate); err != nil {
-					log.Fatal(err)
+					panic(err)
 				}
 				s.onCandidate(candidate)
 				break
 			case api.OpcodeExited:
 				var exited api.Exited
 				if err := json.Unmarshal(data, &exited); err != nil {
-					log.Fatal(err)
+					panic(err)
 				}
 				s.onExited(exited)
 				break loop
 			default:
-				log.Fatal("Invalid message. Consider using a valid opcode.")
+				panic("Invalid message. Consider using a valid opcode.")
 			}
 		}
 	}()

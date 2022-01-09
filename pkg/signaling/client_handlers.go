@@ -3,7 +3,6 @@ package signaling
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"sync"
 
@@ -23,12 +22,14 @@ var (
 type ClientManager struct {
 	lock sync.Mutex
 
-	peers map[string]*peer
+	peers       map[string]*peer
+	onConnected func()
 }
 
-func NewClientManager() *ClientManager {
+func NewClientManager(onConnected func()) *ClientManager {
 	return &ClientManager{
-		peers: map[string]*peer{},
+		peers:       map[string]*peer{},
+		onConnected: onConnected,
 	}
 }
 
@@ -42,7 +43,7 @@ func (m *ClientManager) HandleAcceptance(conn *websocket.Conn, uuid string) erro
 	mac = uuid
 
 	if err := wsjson.Write(context.Background(), conn, api.NewReady(uuid)); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return nil
 }
@@ -50,7 +51,7 @@ func (m *ClientManager) HandleAcceptance(conn *websocket.Conn, uuid string) erro
 func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, uuid string, wg *sync.WaitGroup, f func(msg webrtc.DataChannelMessage)) error {
 	var introduction api.Introduction
 	if err := json.Unmarshal(data, &introduction); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	wg.Add(1)
@@ -66,20 +67,20 @@ func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, uu
 
 	offer, err := peerConnection.CreateOffer(nil)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	if err := peerConnection.SetLocalDescription(offer); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	data, err = json.Marshal(offer)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	if err := wsjson.Write(context.Background(), conn, api.NewOffer(data, uuid, introduction.Mac)); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return nil
 }
@@ -87,7 +88,7 @@ func (m *ClientManager) HandleIntroduction(conn *websocket.Conn, data []byte, uu
 func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, candidates *chan string, wg *sync.WaitGroup, uuid string, f func(msg webrtc.DataChannelMessage)) error {
 	var offer api.Offer
 	if err := json.Unmarshal(data, &offer); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	wg.Add(1)
@@ -95,43 +96,43 @@ func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, candidate
 	var offer_val webrtc.SessionDescription
 
 	if err := json.Unmarshal([]byte(offer.Payload), &offer_val); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	peerConnection, err := m.createPeer(offer.SenderMac, conn, uuid, f)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	if err := peerConnection.SetRemoteDescription(offer_val); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	go func() {
 		for _, candidate := range m.peers[offer.SenderMac].candidates {
 			if err := peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate, SDPMid: refString("0"), SDPMLineIndex: refUint16(0)}); err != nil {
-				log.Fatal(err)
+				panic(err)
 			}
 		}
 	}()
 
 	answer_val, err := peerConnection.CreateAnswer(nil)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	err = peerConnection.SetLocalDescription(answer_val)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	data, err = json.Marshal(answer_val)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	if err := wsjson.Write(context.Background(), conn, api.NewAnswer(data, offer.ReceiverMac, offer.SenderMac)); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	wg.Done()
@@ -141,28 +142,28 @@ func (m *ClientManager) HandleOffer(conn *websocket.Conn, data []byte, candidate
 func (m *ClientManager) HandleAnswer(data []byte, candidates *chan string, wg *sync.WaitGroup) error {
 	var answer api.Answer
 	if err := json.Unmarshal(data, &answer); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	var answer_val webrtc.SessionDescription
 
 	if err := json.Unmarshal([]byte(answer.Payload), &answer_val); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	peerConnection, err := m.getPeerConnection(answer.SenderMac)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	if err := peerConnection.SetRemoteDescription(answer_val); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	go func() {
 		for _, candidate := range m.peers[answer.SenderMac].candidates {
 			if err := peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate, SDPMid: refString("0"), SDPMLineIndex: refUint16(0)}); err != nil {
-				log.Fatal(err)
+				panic(err)
 			}
 		}
 	}()
@@ -172,25 +173,25 @@ func (m *ClientManager) HandleAnswer(data []byte, candidates *chan string, wg *s
 }
 
 func (m *ClientManager) HandleCandidate(data []byte, candidates *chan string) error {
-	fmt.Println("received Candidate")
+	log.Println("received Candidate")
 	var candidate api.Candidate
 	if err := json.Unmarshal(data, &candidate); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	fmt.Println(string(candidate.Payload))
+	log.Println(string(candidate.Payload))
 	go func() {
 		m.peers[candidate.SenderMac].candidates = append(m.peers[candidate.SenderMac].candidates, string(candidate.Payload))
 	}()
 
 	peerConnection, err := m.getPeerConnection(candidate.SenderMac)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	go func() {
 		for _, candidate := range m.peers[candidate.SenderMac].candidates {
 			if err := peerConnection.AddICECandidate(webrtc.ICECandidateInit{Candidate: candidate, SDPMid: refString("0"), SDPMLineIndex: refUint16(0)}); err != nil {
-				log.Fatal(err)
+				panic(err)
 			}
 		}
 	}()
@@ -214,7 +215,7 @@ func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string
 		},
 	})
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	peerConnection.OnConnectionStateChange(func(s webrtc.PeerConnectionState) {
@@ -235,9 +236,9 @@ func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string
 				m.lock.Unlock()
 			}()
 
-			fmt.Println("Candidate was generated!")
+			log.Println("Candidate was generated!")
 			if err := wsjson.Write(context.Background(), conn, api.NewCandidate([]byte(i.ToJSON().Candidate), uuid, mac)); err != nil {
-				log.Fatal(err)
+				panic(err)
 			}
 		}
 	})
@@ -248,6 +249,7 @@ func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string
 
 			m.peers[mac].channel = dc
 
+			m.onConnected()
 		})
 		dc.OnClose(func() {
 			log.Println("sendChannel has closed")
@@ -261,12 +263,15 @@ func (m *ClientManager) createPeer(mac string, conn *websocket.Conn, uuid string
 func (m *ClientManager) createDataChannel(mac string, peerConnection *webrtc.PeerConnection, f func(msg webrtc.DataChannelMessage)) error {
 	dc, err := peerConnection.CreateDataChannel("foo", nil)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	dc.OnOpen(func() {
 		log.Println("sendChannel has opened")
 
 		m.peers[mac].channel = dc
+
+		m.onConnected()
+		log.Println("LOLSEN")
 	})
 	dc.OnClose(func() {
 		log.Println("sendChannel has closed")

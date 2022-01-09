@@ -2,7 +2,6 @@ package signaling
 
 import (
 	"context"
-	"log"
 	"sync"
 
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
@@ -29,7 +28,7 @@ func (m *ServerManager) HandleApplication(application api.Application, conn *web
 		// Send rejection. That mac is already contained
 
 		if err := wsjson.Write(context.Background(), conn, api.NewRejection()); err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 		return nil
 	}
@@ -41,7 +40,7 @@ func (m *ServerManager) HandleApplication(application api.Application, conn *web
 		m.communities[application.Community] = append(m.communities[application.Community], application.Mac)
 
 		if err := wsjson.Write(context.Background(), conn, api.NewAcceptance()); err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 
 		return nil
@@ -50,7 +49,7 @@ func (m *ServerManager) HandleApplication(application api.Application, conn *web
 		m.communities[application.Community] = append(m.communities[application.Community], application.Mac)
 
 		if err := wsjson.Write(context.Background(), conn, api.NewAcceptance()); err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 		return nil
 	}
@@ -59,7 +58,7 @@ func (m *ServerManager) HandleApplication(application api.Application, conn *web
 func (m *ServerManager) HandleReady(ready api.Ready, conn *websocket.Conn) error {
 	community, err := m.getCommunity(ready.Mac)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	// Broadcast the introduction to all connections, excluding our own
@@ -69,7 +68,7 @@ func (m *ServerManager) HandleReady(ready api.Ready, conn *websocket.Conn) error
 
 			// ensure that ready.Mac == m.communities[community][0]
 			if err := wsjson.Write(context.Background(), &receiver, api.NewIntroduction(ready.Mac)); err != nil {
-				log.Fatal(err)
+				panic(err)
 			}
 		} else {
 			continue
@@ -82,7 +81,7 @@ func (m *ServerManager) HandleOffer(offer api.Offer) error {
 	receiver := m.macs[offer.ReceiverMac]
 
 	if err := wsjson.Write(context.Background(), &receiver, offer); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return nil
 }
@@ -91,7 +90,7 @@ func (m *ServerManager) HandleAnswer(answer api.Answer) error {
 	receiver := m.macs[answer.ReceiverMac]
 
 	if err := wsjson.Write(context.Background(), &receiver, answer); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return nil
 }
@@ -100,7 +99,7 @@ func (m *ServerManager) HandleCandidate(candidate api.Candidate) error {
 	receiver := m.macs[candidate.ReceiverMac]
 
 	if err := wsjson.Write(context.Background(), &receiver, candidate); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return nil
 }
@@ -108,7 +107,7 @@ func (m *ServerManager) HandleCandidate(candidate api.Candidate) error {
 func (m *ServerManager) HandleExited(exited api.Exited) error {
 	community, err := m.getCommunity(exited.Mac)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	for _, mac := range m.communities[community] {
@@ -116,7 +115,7 @@ func (m *ServerManager) HandleExited(exited api.Exited) error {
 			receiver := m.macs[mac]
 
 			if err := wsjson.Write(context.Background(), &receiver, api.NewResignation(exited.Mac)); err != nil {
-				log.Fatal(err)
+				panic(err)
 			}
 		} else {
 			continue

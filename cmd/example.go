@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"os"
 	"path/filepath"
@@ -10,19 +11,22 @@ import (
 	"github.com/JakWai01/sile-fystem/pkg/helpers"
 	"github.com/alphahorizonio/libentangle/internal/logging"
 	"github.com/jacobsa/fuse"
+	"github.com/pion/webrtc/v3"
 	"github.com/pojntfx/stfs/pkg/cache"
 	"github.com/pojntfx/stfs/pkg/config"
 	"github.com/pojntfx/stfs/pkg/fs"
 	"github.com/pojntfx/stfs/pkg/operations"
 	"github.com/pojntfx/stfs/pkg/persisters"
-	"github.com/pojntfx/stfs/pkg/tape"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
+	"github.com/alphahorizonio/libentangle/pkg/networking"
+	"github.com/alphahorizonio/libentangle/pkg/readwriteseeker"
 )
 
 const (
 	mountpointFlag = "mountpoint"
-	driveFlag      = "drive"
 	recordSizeFlag = "recordSize"
 	writeCacheFlag = "writeCache"
 )
@@ -34,12 +38,86 @@ var exampleCmd = &cobra.Command{
 
 		l := logging.NewJSONLogger(viper.GetInt(verboseFlag))
 
-		tm := tape.NewTapeManager(
-			viper.GetString(driveFlag),
-			viper.GetInt(recordSizeFlag),
-			false,
-		)
+		// tm := tape.NewTapeManager(
+		// 	viper.GetString(driveFlag),
+		// 	viper.GetInt(recordSizeFlag),
+		// 	false,
+		// )
 
+		rmFile := readwriteseeker.NewRemoteFile()
+
+		onOpen := make(chan struct{})
+
+		go networking.Connect("test", func(msg webrtc.DataChannelMessage) {
+			log.Println(string(msg.Data))
+
+			var v api.Message
+
+			if err := json.Unmarshal(msg.Data, &v); err != nil {
+				panic(err)
+			}
+
+			switch v.Opcode {
+			// This literally is the open handler. We can't open before
+			case api.OpcodeOpenResponse:
+				var openOpResponse api.OpenOpResponse
+				if err := json.Unmarshal(msg.Data, &openOpResponse); err != nil {
+					panic(err)
+				}
+
+				log.Println("BEN DOVER")
+				go func() {
+					rmFile.OpenCh <- openOpResponse
+					log.Println("FUCK YOU MOM BACKWARDS")
+				}()
+
+				break
+			case api.OpcodeCloseResponse:
+				var closeOpResponse api.CloseOpResponse
+				if err := json.Unmarshal(msg.Data, &closeOpResponse); err != nil {
+					panic(err)
+				}
+
+				rmFile.CloseCh <- closeOpResponse
+
+				break
+			case api.OpcodeReadResponse:
+				var readOpResponse api.ReadOpResponse
+				if err := json.Unmarshal(msg.Data, &readOpResponse); err != nil {
+					panic(err)
+				}
+
+				rmFile.ReadCh <- readOpResponse
+
+				break
+			case api.OpcodeWriteResponse:
+				var writeOpResponse api.WriteOpResponse
+				if err := json.Unmarshal(msg.Data, &writeOpResponse); err != nil {
+					panic(err)
+				}
+
+				rmFile.WriteCh <- writeOpResponse
+
+				break
+			case api.OpcodeSeekResponse:
+				var seekOpResponse api.SeekOpResponse
+				if err := json.Unmarshal(msg.Data, &seekOpResponse); err != nil {
+					panic(err)
+				}
+
+				rmFile.SeekCh <- seekOpResponse
+
+				break
+			}
+		}, func() {
+			log.Println("FUCK YOU HARDER")
+			onOpen <- struct{}{}
+			log.Println("BACKWARDS")
+		})
+
+		<-onOpen
+
+		log.Println("ASDF IM HERE FUCK YOU")
 		metadataPersister := persisters.NewMetadataPersister(viper.GetString(metadataFlag))
 		if err := metadataPersister.Open(); err != nil {
 			panic(err)
@@ -55,14 +133,44 @@ var exampleCmd = &cobra.Command{
 			RecordSize:  viper.GetInt(recordSizeFlag),
 		}
 		backendConfig := config.BackendConfig{
-			GetWriter:   tm.GetWriter,
-			CloseWriter: tm.Close,
+			GetWriter: func() (config.DriveWriterConfig, error) {
+				log.Println("WERE IN")
+				if err := rmFile.Open(false); err != nil {
+					return config.DriveWriterConfig{}, err
+				}
 
-			GetReader:   tm.GetReader,
-			CloseReader: tm.Close,
+				return config.DriveWriterConfig{
+					DriveIsRegular: true,
+					Drive:          rmFile,
+				}, nil
+			},
+			CloseWriter: rmFile.Close,
 
-			GetDrive:   tm.GetDrive,
-			CloseDrive: tm.Close,
+			GetReader: func() (config.DriveReaderConfig, error) {
+				if err := rmFile.Open(true); err != nil {
+					return config.DriveReaderConfig{}, err
+				}
+
+				return config.DriveReaderConfig{
+					DriveIsRegular: true,
+					Drive:          rmFile,
+				}, nil
+			},
+			CloseReader: rmFile.Close,
+
+			GetDrive: func() (config.DriveConfig, error) {
+				log.Println("BEFORE I CALL OPEN")
+				if err := rmFile.Open(true); err != nil {
+					return config.DriveConfig{}, err
+				}
+				log.Println("YOU MOM")
+
+				return config.DriveConfig{
+					DriveIsRegular: true,
+					Drive:          rmFile,
+				}, nil
+			},
+			CloseDrive: rmFile.Close,
 		}
 		readCryptoConfig := config.CryptoConfig{}
 
@@ -115,6 +223,8 @@ var exampleCmd = &cobra.Command{
 			panic(err)
 		}
 
+		log.Println("YOUR MOM SUCKS")
+
 		fs, err := cache.NewCacheFilesystem(
 			stfs,
 			root,
@@ -145,7 +255,6 @@ var exampleCmd = &cobra.Command{
 func init() {
 	exampleCmd.PersistentFlags().String(mountpointFlag, "/tmp/mount", "Mountpoint to use for FUSE")
 
-	exampleCmd.PersistentFlags().String(driveFlag, "/dev/nst0", "Tape drive or tar archive to use as backend")
 	exampleCmd.PersistentFlags().Int(recordSizeFlag, 20, "Amount of 512-bit blocks per second")
 	exampleCmd.PersistentFlags().String(writeCacheFlag, filepath.Join(os.TempDir(), "stfs-write-cache"), "Directory to use for write cache")
 
@@ -155,4 +264,6 @@ func init() {
 	}
 	viper.SetEnvPrefix("sile-fystem")
 	viper.AutomaticEnv()
+
+	rootCmd.AddCommand(exampleCmd)
 }

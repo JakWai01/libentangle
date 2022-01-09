@@ -23,7 +23,8 @@ func (e *FileSystemError) Error() string {
 }
 
 type RemoteFile struct {
-	// lock    sync.Mutex
+	lock    sync.Mutex
+	opened  bool
 	oplock  sync.Mutex
 	ReadCh  chan api.ReadOpResponse
 	WriteCh chan api.WriteOpResponse
@@ -48,11 +49,16 @@ func (f *RemoteFile) Fd() uintptr {
 
 // Is this doing the right thing
 func (f *RemoteFile) Open(create bool) error {
-	log.Println("REMOTEFILE.Open", string(debug.Stack()))
+	log.Println("REMOTEFILE.Open", create, string(debug.Stack()))
 	f.oplock.Lock()
 	defer f.oplock.Unlock()
+
+	if f.opened == true {
+		return nil
+	}
+
 	log.Println("LOCKING")
-	// f.lock.Lock()
+	f.lock.Lock()
 	log.Println("AFTER LOCKING")
 
 	msg, err := json.Marshal(api.NewOpenOp(create))
@@ -72,6 +78,8 @@ func (f *RemoteFile) Open(create bool) error {
 
 	error2 := <-errorChan
 
+	f.opened = true
+
 	if error2 == "" {
 		return nil
 	}
@@ -84,6 +92,7 @@ func (f *RemoteFile) Close() error {
 
 	f.oplock.Lock()
 	defer f.oplock.Unlock()
+
 	log.Println("CLOSING FILE")
 	msg, err := json.Marshal(api.NewCloseOp())
 	if err != nil {
@@ -95,9 +104,11 @@ func (f *RemoteFile) Close() error {
 	response := <-f.CloseCh
 
 	log.Println("UNLOCKING")
-	// f.lock.Unlock()
+	if f.opened != false {
+		f.lock.Unlock()
+	}
 	log.Println("AFTER UNLOCKING")
-
+	f.opened = false
 	return getError(response.Error)
 }
 

@@ -64,7 +64,7 @@ var serverCmd = &cobra.Command{
 						networking.WriteToDataChannel(msg)
 					}
 				} else {
-					file, err = os.OpenFile(myFile, os.O_CREATE|os.O_RDWR, os.ModePerm)
+					file, err = os.OpenFile(myFile, os.O_CREATE|os.O_RDWR|os.O_APPEND, os.ModePerm)
 					if err != nil {
 						msg, err := json.Marshal(api.NewOpenOpResponse(err.Error()))
 						if err != nil {

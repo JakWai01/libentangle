@@ -44,8 +44,3 @@ func Execute() error {
 
 	return rootCmd.Execute()
 }
-
-func init() {
-	rootCmd.AddCommand(signalCmd)
-	rootCmd.AddCommand(serverCmd)
-}

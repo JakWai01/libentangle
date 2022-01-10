@@ -28,7 +28,7 @@ type Offer struct {
 	Message
 	Payload     []byte `json:"payload"`
 	SenderMac   string `json:"sender"`
-	ReceiverMac string `json:"receiver`
+	ReceiverMac string `json:"receiver"`
 }
 
 type Answer struct {

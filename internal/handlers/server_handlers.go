@@ -1,7 +1,8 @@
-package signaling
+package handlers
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
@@ -127,7 +128,7 @@ func (m *ServerManager) HandleExited(exited api.Exited) error {
 	delete(m.macs, exited.Mac)
 
 	// Remove member from community
-	m.communities[community] = deleteElement(m.communities[community], exited.Mac)
+	m.communities[community] = m.deleteCommunity(m.communities[community], exited.Mac)
 
 	// Remove community only if there is only one member left
 	if len(m.communities[community]) == 0 {
@@ -135,4 +136,26 @@ func (m *ServerManager) HandleExited(exited api.Exited) error {
 	}
 
 	return nil
+}
+
+func (m *ServerManager) getCommunity(mac string) (string, error) {
+	for key, element := range m.communities {
+		for i := 0; i < len(element); i++ {
+			if element[i] == mac {
+				return key, nil
+			}
+		}
+	}
+
+	return "", errors.New("This mac is not part of any community so far!")
+}
+
+func (m *ServerManager) deleteCommunity(s []string, str string) []string {
+	var elementIndex int
+	for index, element := range s {
+		if element == str {
+			elementIndex = index
+		}
+	}
+	return append(s[:elementIndex], s[elementIndex+1:]...)
 }

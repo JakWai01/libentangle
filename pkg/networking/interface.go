@@ -3,13 +3,14 @@ package networking
 import (
 	"sync"
 
+	"github.com/alphahorizonio/libentangle/internal/handlers"
 	"github.com/alphahorizonio/libentangle/pkg/signaling"
 	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"
 )
 
 var (
-	manager *signaling.ClientManager
+	manager *handlers.ClientManager
 )
 
 type NoConnectionEstablished struct{}
@@ -19,7 +20,7 @@ func (m *NoConnectionEstablished) Error() string {
 }
 
 func Connect(community string, f func(msg webrtc.DataChannelMessage), onConnected func()) {
-	manager = signaling.NewClientManager(onConnected)
+	manager = handlers.NewClientManager(onConnected)
 
 	client := signaling.NewSignalingClient(
 		func(conn *websocket.Conn, uuid string) error {

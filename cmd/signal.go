@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/alphahorizonio/libentangle/internal/handlers"
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
 	"github.com/alphahorizonio/libentangle/pkg/signaling"
 	"github.com/spf13/cobra"
@@ -24,7 +25,7 @@ var signalCmd = &cobra.Command{
 
 			log.Printf("signaling server listening on %v", addr)
 
-			manager := signaling.NewCommunitiesManager()
+			manager := handlers.NewCommunitiesManager()
 
 			signaler := signaling.NewSignalingServer(
 				func(application api.Application, conn *websocket.Conn) error {

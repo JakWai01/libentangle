@@ -1,4 +1,4 @@
-package signaling
+package handlers
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
+	"github.com/alphahorizonio/libentangle/pkg/config"
 	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
@@ -199,7 +200,7 @@ func (m *ClientManager) HandleCandidate(data []byte, candidates *chan string) er
 }
 
 func (m *ClientManager) HandleResignation() error {
-	exitClient <- struct{}{}
+	config.ExitClient <- struct{}{}
 	return nil
 }
 
@@ -303,4 +304,12 @@ func (m *ClientManager) SendMessageUnicast(msg []byte, mac string) error {
 	} else {
 		return err
 	}
+}
+
+func refString(s string) *string {
+	return &s
+}
+
+func refUint16(i uint16) *uint16 {
+	return &i
 }

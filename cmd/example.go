@@ -23,7 +23,6 @@ import (
 
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
 	"github.com/alphahorizonio/libentangle/pkg/networking"
-	"github.com/alphahorizonio/libentangle/pkg/readwriteseeker"
 )
 
 const (
@@ -46,7 +45,7 @@ var exampleCmd = &cobra.Command{
 		// 	false,
 		// )
 
-		rmFile := readwriteseeker.NewRemoteFile()
+		rmFile := networking.NewRemoteFile()
 
 		onOpen := make(chan struct{})
 

@@ -219,7 +219,6 @@ var entangleCmd = &cobra.Command{
 				}
 
 				switch v.Opcode {
-				// This literally is the open handler. We can't open before
 				case api.OpcodeOpenResponse:
 					var openOpResponse api.OpenOpResponse
 					if err := json.Unmarshal(msg.Data, &openOpResponse); err != nil {

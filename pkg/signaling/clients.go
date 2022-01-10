@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
+	"github.com/alphahorizonio/libentangle/pkg/config"
 	"github.com/google/uuid"
 	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"
@@ -112,17 +113,9 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, f fun
 			}
 		}
 	}()
-	<-exitClient
+	<-config.ExitClient
 	if err := wsjson.Write(context.Background(), conn, api.NewExited(uuid)); err != nil {
 		panic(err)
 	}
 	return result
-}
-
-func refString(s string) *string {
-	return &s
-}
-
-func refUint16(i uint16) *uint16 {
-	return &i
 }

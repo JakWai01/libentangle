@@ -16,10 +16,6 @@ import (
 	"nhooyr.io/websocket/wsjson"
 )
 
-var (
-	result []byte
-)
-
 type SignalingClient struct {
 	onAcceptance   func(conn *websocket.Conn, uuid string) error
 	onIntroduction func(conn *websocket.Conn, data []byte, uuid string, wg *sync.WaitGroup) error
@@ -47,7 +43,7 @@ func NewSignalingClient(
 	}
 }
 
-func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, f func(msg webrtc.DataChannelMessage)) []byte {
+func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, f func(msg webrtc.DataChannelMessage)) {
 	uuid := uuid.NewString()
 
 	wsAddress := "ws://" + laddrKey
@@ -117,5 +113,5 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, f fun
 	if err := wsjson.Write(context.Background(), conn, api.NewExited(uuid)); err != nil {
 		panic(err)
 	}
-	return result
+	return
 }

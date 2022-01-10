@@ -27,7 +27,6 @@ func NewCommunitiesManager() *ServerManager {
 func (m *ServerManager) HandleApplication(application api.Application, conn *websocket.Conn) error {
 	if _, ok := m.macs[application.Mac]; ok {
 		// Send rejection. That mac is already contained
-
 		if err := wsjson.Write(context.Background(), conn, api.NewRejection()); err != nil {
 			panic(err)
 		}

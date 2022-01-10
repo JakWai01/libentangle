@@ -9,6 +9,7 @@ import (
 
 	"github.com/JakWai01/sile-fystem/pkg/filesystem"
 	"github.com/JakWai01/sile-fystem/pkg/helpers"
+	"github.com/alphahorizonio/libentangle/internal/handlers"
 	"github.com/alphahorizonio/libentangle/internal/logging"
 	"github.com/jacobsa/fuse"
 	"github.com/pion/webrtc/v3"
@@ -37,10 +38,16 @@ var entangleCmd = &cobra.Command{
 	Short: "Mount a folder on a given path",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
+		onOpen := make(chan struct{})
+		manager := handlers.NewClientManager(func() {
+			onOpen <- struct{}{}
+		})
+
+		cm := networking.NewConnectionManager(manager)
+
 		if viper.GetBool(serverFlag) {
 			var file *os.File
 
-			onOpen := make(chan struct{})
 			dir, err := os.MkdirTemp(os.TempDir(), "serverfiles-*")
 			if err != nil {
 				panic(err)
@@ -48,7 +55,7 @@ var entangleCmd = &cobra.Command{
 
 			myFile := filepath.Join(dir, "serverfile.tar")
 
-			networking.Connect("test", func(msg webrtc.DataChannelMessage) {
+			cm.Connect("test", func(msg webrtc.DataChannelMessage) {
 
 				log.Println(string(msg.Data))
 
@@ -73,14 +80,14 @@ var entangleCmd = &cobra.Command{
 								panic(err)
 							}
 
-							networking.WriteToDataChannel(msg)
+							cm.Write(msg)
 						} else {
 							msg, err := json.Marshal(api.NewOpenOpResponse(""))
 							if err != nil {
 								panic(err)
 							}
 
-							networking.WriteToDataChannel(msg)
+							cm.Write(msg)
 						}
 					} else {
 						file, err = os.OpenFile(myFile, os.O_CREATE|os.O_RDWR|os.O_APPEND, os.ModePerm)
@@ -90,14 +97,14 @@ var entangleCmd = &cobra.Command{
 								panic(err)
 							}
 
-							networking.WriteToDataChannel(msg)
+							cm.Write(msg)
 						} else {
 							msg, err := json.Marshal(api.NewOpenOpResponse(""))
 							if err != nil {
 								panic(err)
 							}
 
-							networking.WriteToDataChannel(msg)
+							cm.Write(msg)
 						}
 					}
 
@@ -115,7 +122,7 @@ var entangleCmd = &cobra.Command{
 						panic(err)
 					}
 
-					networking.WriteToDataChannel(msg)
+					cm.Write(msg)
 
 					break
 				case api.OpcodeRead:
@@ -133,14 +140,14 @@ var entangleCmd = &cobra.Command{
 							panic(err)
 						}
 
-						networking.WriteToDataChannel(msg)
+						cm.Write(msg)
 					} else {
 						msg, err := json.Marshal(api.NewReadOpResponse(buf, int64(n), ""))
 						if err != nil {
 							panic(err)
 						}
 
-						networking.WriteToDataChannel(msg)
+						cm.Write(msg)
 					}
 
 					break
@@ -157,14 +164,14 @@ var entangleCmd = &cobra.Command{
 							panic(err)
 						}
 
-						networking.WriteToDataChannel(msg)
+						cm.Write(msg)
 					} else {
 						msg, err := json.Marshal(api.NewWriteOpResponse(int64(n), ""))
 						if err != nil {
 							panic(err)
 						}
 
-						networking.WriteToDataChannel(msg)
+						cm.Write(msg)
 					}
 
 					break
@@ -181,20 +188,18 @@ var entangleCmd = &cobra.Command{
 							panic(err)
 						}
 
-						networking.WriteToDataChannel(msg)
+						cm.Write(msg)
 					} else {
 						msg, err := json.Marshal(api.NewSeekOpResponse(offset, ""))
 						if err != nil {
 							panic(err)
 						}
 
-						networking.WriteToDataChannel(msg)
+						cm.Write(msg)
 					}
 
 					break
 				}
-			}, func() {
-				onOpen <- struct{}{}
 			})
 
 			<-onOpen
@@ -205,11 +210,9 @@ var entangleCmd = &cobra.Command{
 			boil.DebugMode = true
 			boil.DebugWriter = os.Stderr
 
-			rmFile := networking.NewRemoteFile()
+			rmFile := networking.NewRemoteFile(*cm)
 
-			onOpen := make(chan struct{})
-
-			go networking.Connect("test", func(msg webrtc.DataChannelMessage) {
+			go cm.Connect("test", func(msg webrtc.DataChannelMessage) {
 				log.Println(string(msg.Data))
 
 				var v api.Message
@@ -267,8 +270,6 @@ var entangleCmd = &cobra.Command{
 
 					break
 				}
-			}, func() {
-				onOpen <- struct{}{}
 			})
 
 			<-onOpen
@@ -400,7 +401,6 @@ var entangleCmd = &cobra.Command{
 
 			return nil
 		}
-
 	},
 }
 

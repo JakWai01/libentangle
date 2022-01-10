@@ -61,6 +61,8 @@ github.com/DATA-DOG/go-sqlmock v1.4.1/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/JakWai01/sile-fystem v0.0.0-20220105100017-c0c437867d48 h1:dYPGFKpa4sCFx6JxpShNwM+YvvcUfNTqpqeW6NwQ4I8=
 github.com/JakWai01/sile-fystem v0.0.0-20220105100017-c0c437867d48/go.mod h1:XYqpoP3yLBU99iHOtRK1GSs9M22aozMEHnwkWORGFew=
+github.com/JakWai01/sile-fystem v0.0.0-20220109122210-6ea23e472730 h1:lpRfNSlum4R4xzswa7rFUtWe8NEp0ydkG0lfE4IVxE0=
+github.com/JakWai01/sile-fystem v0.0.0-20220109122210-6ea23e472730/go.mod h1:XYqpoP3yLBU99iHOtRK1GSs9M22aozMEHnwkWORGFew=
 github.com/Masterminds/goutils v1.1.0/go.mod h1:8cTjp+g8YejhMuvIA5y2vz3BpJxksy863GQaJW2MFNU=
 github.com/Masterminds/semver v1.5.0/go.mod h1:MB6lktGJrhw8PrUyiEoblNEGEQ+RzHPF078ddwwvV3Y=
 github.com/Masterminds/sprig v2.22.0+incompatible/go.mod h1:y6hNFY5UBTIWBxnzTeuNhlNS5hqE0NB0E6fgfo2Br3o=
@@ -329,6 +331,8 @@ github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NH
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/jacobsa/fuse v0.0.0-20211125163655-ffd6c474e806 h1:DiUk5AzBZMGRMljnsHBvI4uc+rm4UCfgv5nTpAvFLi8=
 github.com/jacobsa/fuse v0.0.0-20211125163655-ffd6c474e806/go.mod h1:xtZnnLxHY6QniCrfIpTwr5h8mH8zr+jsOFj0y9cfyp4=
+github.com/jacobsa/fuse v0.0.0-20220109145407-1b9b09fd17a4 h1:HkRJJ0xVoeIWE98hdftUyOAPwfrT07LG6nfzjVNO7x0=
+github.com/jacobsa/fuse v0.0.0-20220109145407-1b9b09fd17a4/go.mod h1:xtZnnLxHY6QniCrfIpTwr5h8mH8zr+jsOFj0y9cfyp4=
 github.com/jacobsa/oglematchers v0.0.0-20150720000706-141901ea67cd/go.mod h1:TlmyIZDpGmwRoTWiakdr+HA1Tukze6C6XbRVidYq02M=
 github.com/jacobsa/oglemock v0.0.0-20150831005832-e94d794d06ff/go.mod h1:gJWba/XXGl0UoOmBQKRWCJdHrr3nE0T65t6ioaj3mLI=
 github.com/jacobsa/ogletest v0.0.0-20170503003838-80d50a735a11/go.mod h1:+DBdDyfoO2McrOyDemRBq0q9CMEByef7sYl7JH5Q3BI=
@@ -532,6 +536,8 @@ github.com/pkg/sftp v1.13.1/go.mod h1:3HaPG6Dq1ILlpPZRO0HVMrsydcdLt6HRDccSgb87qR
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pojntfx/stfs v0.0.0-20220109021244-d3a43b4adb24 h1:eUUqOGfpISizHoXB357Dh9DFI1mXTFCbSVhyMPte+fQ=
 github.com/pojntfx/stfs v0.0.0-20220109021244-d3a43b4adb24/go.mod h1:/4zCkcsXeFTZR3vZ4zqXceV74FXIbVq1l9rJxECQwT8=
+github.com/pojntfx/stfs v0.0.0-20220109224304-abd9d5443570 h1:BgQVPje3O1qWE/crmunkm8QxuuC51JZSrvTjfqc6Fbc=
+github.com/pojntfx/stfs v0.0.0-20220109224304-abd9d5443570/go.mod h1:/4zCkcsXeFTZR3vZ4zqXceV74FXIbVq1l9rJxECQwT8=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/posener/complete v1.2.3/go.mod h1:WZIdtGGp+qx0sLrYKtIRAruyNpv6hFCicSgv7Sy7s/s=
 github.com/prometheus/client_golang v0.9.1/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=
@@ -898,6 +904,8 @@ golang.org/x/sys v0.0.0-20211214234402-4825e8c3871d h1:1oIt9o40TWWI9FUaveVpUvBe1
 golang.org/x/sys v0.0.0-20211214234402-4825e8c3871d/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e h1:fLOSk5Q00efkSvAm+4xcoXD+RRmLmmulPn5I3Y9F2EM=
 golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220110181412-a018aaa089fe h1:W8vbETX/n8S6EmY0Pu4Ix7VvpsJUESTwl0oCK8MJOgk=
+golang.org/x/sys v0.0.0-20220110181412-a018aaa089fe/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201117132131-f5c789dd3221/go.mod h1:Nr5EML6q2oocZ2LXRh80K7BxOlk5/8JxuGnuhpl+muw=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=

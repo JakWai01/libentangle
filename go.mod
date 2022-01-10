@@ -7,6 +7,7 @@ require (
 	github.com/pion/webrtc/v3 v3.1.13
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
+	github.com/volatiletech/sqlboiler/v4 v4.8.3
 	nhooyr.io/websocket v1.8.7
 )
 
@@ -31,7 +32,6 @@ require (
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	github.com/volatiletech/null/v8 v8.1.2 // indirect
 	github.com/volatiletech/randomize v0.0.1 // indirect
-	github.com/volatiletech/sqlboiler/v4 v4.8.3 // indirect
 	github.com/volatiletech/strmangle v0.0.1 // indirect
 	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/tools v0.1.8 // indirect
@@ -49,12 +49,12 @@ require (
 )
 
 require (
-	github.com/JakWai01/sile-fystem v0.0.0-20220105100017-c0c437867d48
+	github.com/JakWai01/sile-fystem v0.0.0-20220109122210-6ea23e472730
 	github.com/fclairamb/go-log v0.2.0
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/jacobsa/fuse v0.0.0-20211125163655-ffd6c474e806
+	github.com/jacobsa/fuse v0.0.0-20220109145407-1b9b09fd17a4
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
@@ -75,7 +75,7 @@ require (
 	github.com/pion/transport v0.13.0 // indirect
 	github.com/pion/turn/v2 v2.0.6 // indirect
 	github.com/pion/udp v0.1.1 // indirect
-	github.com/pojntfx/stfs v0.0.0-20220109021244-d3a43b4adb24
+	github.com/pojntfx/stfs v0.0.0-20220109224304-abd9d5443570
 	github.com/spf13/afero v1.8.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
@@ -83,7 +83,7 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
 	golang.org/x/net v0.0.0-20220107192237-5cfca573fb4d // indirect
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	golang.org/x/sys v0.0.0-20220110181412-a018aaa089fe // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect

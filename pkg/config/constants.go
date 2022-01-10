@@ -1,4 +1,4 @@
-package readwriteseeker
+package config
 
 const (
 	NoneKey = ""

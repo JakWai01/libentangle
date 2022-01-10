@@ -1,4 +1,4 @@
-package readwriteseeker
+package networking
 
 import (
 	"encoding/json"
@@ -7,10 +7,8 @@ import (
 	"sync"
 
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
-	"github.com/alphahorizonio/libentangle/pkg/networking"
+	"github.com/alphahorizonio/libentangle/pkg/config"
 )
-
-var ()
 
 type FileSystemError struct {
 	err string
@@ -60,7 +58,7 @@ func (f *RemoteFile) Open(create bool) error {
 		panic(err)
 	}
 
-	networking.WriteToDataChannel(msg)
+	WriteToDataChannel(msg)
 
 	errorChan := make(chan string)
 	go func() {
@@ -89,7 +87,7 @@ func (f *RemoteFile) Close() error {
 		panic(err)
 	}
 
-	networking.WriteToDataChannel(msg)
+	WriteToDataChannel(msg)
 
 	response := <-f.CloseCh
 
@@ -108,7 +106,7 @@ func (f *RemoteFile) Read(n []byte) (int, error) {
 		panic(err)
 	}
 
-	networking.WriteToDataChannel(msg)
+	WriteToDataChannel(msg)
 
 	response := <-f.ReadCh
 
@@ -125,7 +123,7 @@ func (f *RemoteFile) Write(n []byte) (int, error) {
 		panic(err)
 	}
 
-	networking.WriteToDataChannel(msg)
+	WriteToDataChannel(msg)
 
 	response := <-f.WriteCh
 
@@ -140,7 +138,7 @@ func (f *RemoteFile) Seek(offset int64, whence int) (int64, error) {
 		panic(err)
 	}
 
-	networking.WriteToDataChannel(msg)
+	WriteToDataChannel(msg)
 
 	response := <-f.SeekCh
 
@@ -149,7 +147,7 @@ func (f *RemoteFile) Seek(offset int64, whence int) (int64, error) {
 
 func getError(err string) error {
 	switch err {
-	case NoneKey:
+	case config.NoneKey:
 		return nil
 	case "EOF":
 		return io.EOF

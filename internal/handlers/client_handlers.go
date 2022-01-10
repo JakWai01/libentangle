@@ -13,18 +13,13 @@ import (
 	"nhooyr.io/websocket/wsjson"
 )
 
-var (
-	mac      string
-	DC       chan *webrtc.DataChannel
-	DC2      chan *webrtc.DataChannel
-	Messages chan []byte
-)
-
 type ClientManager struct {
 	lock sync.Mutex
 
 	peers       map[string]*peer
 	onConnected func()
+
+	mac string
 }
 
 func NewClientManager(onConnected func()) *ClientManager {
@@ -41,7 +36,7 @@ type peer struct {
 }
 
 func (m *ClientManager) HandleAcceptance(conn *websocket.Conn, uuid string) error {
-	mac = uuid
+	m.mac = uuid
 
 	if err := wsjson.Write(context.Background(), conn, api.NewReady(uuid)); err != nil {
 		panic(err)
@@ -287,7 +282,7 @@ func (m *ClientManager) getPeerConnection(mac string) (*webrtc.PeerConnection, e
 
 func (m *ClientManager) SendMessage(msg []byte) error {
 	for key := range m.peers {
-		if key != mac {
+		if key != m.mac {
 			if err := m.peers[key].channel.Send(msg); err != nil {
 				return nil
 			} else {

@@ -10,27 +10,23 @@ import (
 	"github.com/alphahorizonio/libentangle/pkg/config"
 )
 
-type FileSystemError struct {
-	err string
-}
-
-func (e *FileSystemError) Error() string {
-	return e.err
-}
-
 type RemoteFile struct {
-	lock    sync.Mutex
-	opened  bool
-	oplock  sync.Mutex
+	lock   sync.Mutex
+	opened bool
+	oplock sync.Mutex
+
 	ReadCh  chan api.ReadOpResponse
 	WriteCh chan api.WriteOpResponse
 	SeekCh  chan api.SeekOpResponse
 	CloseCh chan api.CloseOpResponse
 	OpenCh  chan api.OpenOpResponse
+
+	cm ConnectionManager
 }
 
-func NewRemoteFile() *RemoteFile {
+func NewRemoteFile(cm ConnectionManager) *RemoteFile {
 	return &RemoteFile{
+		cm:      cm,
 		ReadCh:  make(chan api.ReadOpResponse),
 		WriteCh: make(chan api.WriteOpResponse),
 		SeekCh:  make(chan api.SeekOpResponse),
@@ -58,7 +54,7 @@ func (f *RemoteFile) Open(create bool) error {
 		panic(err)
 	}
 
-	WriteToDataChannel(msg)
+	f.cm.Write(msg)
 
 	errorChan := make(chan string)
 	go func() {
@@ -87,7 +83,7 @@ func (f *RemoteFile) Close() error {
 		panic(err)
 	}
 
-	WriteToDataChannel(msg)
+	f.cm.Write(msg)
 
 	response := <-f.CloseCh
 
@@ -106,7 +102,7 @@ func (f *RemoteFile) Read(n []byte) (int, error) {
 		panic(err)
 	}
 
-	WriteToDataChannel(msg)
+	f.cm.Write(msg)
 
 	response := <-f.ReadCh
 
@@ -123,7 +119,7 @@ func (f *RemoteFile) Write(n []byte) (int, error) {
 		panic(err)
 	}
 
-	WriteToDataChannel(msg)
+	f.cm.Write(msg)
 
 	response := <-f.WriteCh
 
@@ -138,7 +134,7 @@ func (f *RemoteFile) Seek(offset int64, whence int) (int64, error) {
 		panic(err)
 	}
 
-	WriteToDataChannel(msg)
+	f.cm.Write(msg)
 
 	response := <-f.SeekCh
 

@@ -66,3 +66,7 @@ var signalCmd = &cobra.Command{
 		}
 	},
 }
+
+func init() {
+	rootCmd.AddCommand(signalCmd)
+}

@@ -40,7 +40,6 @@ var serverCmd = &cobra.Command{
 
 			switch v.Opcode {
 			case api.OpcodeOpen:
-				// Lock
 				var openOp api.OpenOp
 				if err := json.Unmarshal(msg.Data, &openOp); err != nil {
 					panic(err)
@@ -84,28 +83,13 @@ var serverCmd = &cobra.Command{
 
 				break
 			case api.OpcodeClose:
-				// Unlock
 				var closeOp api.CloseOp
 				if err := json.Unmarshal(msg.Data, &closeOp); err != nil {
 					panic(err)
 				}
 
 				file.Close()
-				// if err != nil {
-				// 	msg, err := json.Marshal(api.NewCloseOpResponse(err.Error()))
-				// 	if err != nil {
-				// 		panic(err)
-				// 	}
 
-				// 	networking.WriteToDataChannel(msg)
-				// } else {
-				// 	msg, err := json.Marshal(api.NewCloseOpResponse(""))
-				// 	if err != nil {
-				// 		panic(err)
-				// 	}
-
-				// 	networking.WriteToDataChannel(msg)
-				// }
 				msg, err := json.Marshal(api.NewCloseOpResponse(""))
 				if err != nil {
 					panic(err)

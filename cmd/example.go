@@ -67,10 +67,8 @@ var exampleCmd = &cobra.Command{
 					panic(err)
 				}
 
-				log.Println("BEN DOVER")
 				go func() {
 					rmFile.OpenCh <- openOpResponse
-					log.Println("FUCK YOU MOM BACKWARDS")
 				}()
 
 				break
@@ -112,14 +110,11 @@ var exampleCmd = &cobra.Command{
 				break
 			}
 		}, func() {
-			log.Println("FUCK YOU HARDER")
 			onOpen <- struct{}{}
-			log.Println("BACKWARDS")
 		})
 
 		<-onOpen
 
-		log.Println("ASDF IM HERE FUCK YOU")
 		metadataPersister := persisters.NewMetadataPersister(viper.GetString(metadataFlag))
 		if err := metadataPersister.Open(); err != nil {
 			panic(err)
@@ -136,7 +131,6 @@ var exampleCmd = &cobra.Command{
 		}
 		backendConfig := config.BackendConfig{
 			GetWriter: func() (config.DriveWriterConfig, error) {
-				log.Println("WERE IN")
 				if err := rmFile.Open(false); err != nil {
 					return config.DriveWriterConfig{}, err
 				}
@@ -161,11 +155,9 @@ var exampleCmd = &cobra.Command{
 			CloseReader: rmFile.Close,
 
 			GetDrive: func() (config.DriveConfig, error) {
-				log.Println("BEFORE I CALL OPEN")
 				if err := rmFile.Open(true); err != nil {
 					return config.DriveConfig{}, err
 				}
-				log.Println("YOU MOM")
 
 				return config.DriveConfig{
 					DriveIsRegular: true,
@@ -224,8 +216,6 @@ var exampleCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-
-		log.Println("YOUR MOM SUCKS")
 
 		fs, err := cache.NewCacheFilesystem(
 			stfs,

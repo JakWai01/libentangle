@@ -271,7 +271,6 @@ func (m *ClientManager) createDataChannel(mac string, peerConnection *webrtc.Pee
 		m.peers[mac].channel = dc
 
 		m.onConnected()
-		log.Println("LOLSEN")
 	})
 	dc.OnClose(func() {
 		log.Println("sendChannel has closed")

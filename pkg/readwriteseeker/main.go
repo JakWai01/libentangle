@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
-	"runtime/debug"
 	"sync"
 
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
@@ -47,9 +45,7 @@ func (f *RemoteFile) Fd() uintptr {
 	return 1
 }
 
-// Is this doing the right thing
 func (f *RemoteFile) Open(create bool) error {
-	log.Println("REMOTEFILE.Open", create, string(debug.Stack()))
 	f.oplock.Lock()
 	defer f.oplock.Unlock()
 
@@ -57,9 +53,7 @@ func (f *RemoteFile) Open(create bool) error {
 		return nil
 	}
 
-	log.Println("LOCKING")
 	f.lock.Lock()
-	log.Println("AFTER LOCKING")
 
 	msg, err := json.Marshal(api.NewOpenOp(create))
 	if err != nil {
@@ -68,11 +62,9 @@ func (f *RemoteFile) Open(create bool) error {
 
 	networking.WriteToDataChannel(msg)
 
-	log.Println("ASLDKJASLKDJ")
 	errorChan := make(chan string)
 	go func() {
 		err := <-f.OpenCh
-		log.Println("USA FUCKS", err)
 		errorChan <- err.Error
 	}()
 
@@ -88,12 +80,10 @@ func (f *RemoteFile) Open(create bool) error {
 }
 
 func (f *RemoteFile) Close() error {
-	log.Println("REMOTEFILE.CLose", string(debug.Stack()))
 
 	f.oplock.Lock()
 	defer f.oplock.Unlock()
 
-	log.Println("CLOSING FILE")
 	msg, err := json.Marshal(api.NewCloseOp())
 	if err != nil {
 		panic(err)
@@ -103,16 +93,12 @@ func (f *RemoteFile) Close() error {
 
 	response := <-f.CloseCh
 
-	log.Println("UNLOCKING")
 	if f.opened != false {
 		f.lock.Unlock()
 	}
-	log.Println("AFTER UNLOCKING")
 	f.opened = false
 	return getError(response.Error)
 }
-
-// .Connect() responding to a channel onOpen
 
 func (f *RemoteFile) Read(n []byte) (int, error) {
 	f.oplock.Lock()

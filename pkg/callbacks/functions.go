@@ -10,7 +10,13 @@ import (
 	"github.com/pion/webrtc/v3"
 )
 
-func GetServerCallback(cm networking.ConnectionManager, file *os.File, myFile string) func(msg webrtc.DataChannelMessage) {
+type Callback struct{}
+
+func NewCallback() *Callback {
+	return &Callback{}
+}
+
+func (c *Callback) GetServerCallback(cm networking.ConnectionManager, file *os.File, myFile string) func(msg webrtc.DataChannelMessage) {
 	return func(msg webrtc.DataChannelMessage) {
 		var err error
 
@@ -160,7 +166,7 @@ func GetServerCallback(cm networking.ConnectionManager, file *os.File, myFile st
 	}
 }
 
-func GetClientCallback(rmFile networking.RemoteFile) func(msg webrtc.DataChannelMessage) {
+func (c *Callback) GetClientCallback(rmFile networking.RemoteFile) func(msg webrtc.DataChannelMessage) {
 	return func(msg webrtc.DataChannelMessage) {
 		log.Println(string(msg.Data))
 

@@ -6,7 +6,7 @@ import (
 	"io"
 	"sync"
 
-	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
+	api "github.com/alphahorizonio/libentangle/pkg/api/datachannels/v1"
 	"github.com/alphahorizonio/libentangle/pkg/config"
 )
 

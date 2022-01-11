@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
+	api "github.com/alphahorizonio/libentangle/pkg/api/datachannels/v1"
 	"github.com/alphahorizonio/libentangle/pkg/networking"
 	"github.com/pion/webrtc/v3"
 )

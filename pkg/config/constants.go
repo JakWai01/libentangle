@@ -6,5 +6,4 @@ const (
 
 var (
 	ExitClient = make(chan struct{})
-	ExitServer = make(chan struct{})
 )

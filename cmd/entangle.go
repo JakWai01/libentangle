@@ -53,7 +53,9 @@ var entangleCmd = &cobra.Command{
 
 			myFile := filepath.Join(dir, "serverfile.tar")
 
-			cm.Connect("test", callbacks.GetServerCallback(*cm, file, myFile))
+			callback := callbacks.NewCallback()
+
+			cm.Connect("test", callback.GetServerCallback(*cm, file, myFile))
 
 			<-onOpen
 
@@ -65,7 +67,9 @@ var entangleCmd = &cobra.Command{
 
 			rmFile := networking.NewRemoteFile(*cm)
 
-			go cm.Connect("test", callbacks.GetClientCallback(*rmFile))
+			callback := callbacks.NewCallback()
+
+			go cm.Connect("test", callback.GetClientCallback(*rmFile))
 
 			<-onOpen
 

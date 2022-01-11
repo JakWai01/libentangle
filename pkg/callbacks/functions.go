@@ -22,16 +22,24 @@ func (c *Callback) GetServerCallback(cm networking.ConnectionManager, file *os.F
 
 		log.Println(string(msg.Data))
 
+		var w api.WrappedMessage
+
+		if err := json.Unmarshal(msg.Data, &w); err != nil {
+			panic(err)
+		}
+
+		log.Println(string(w.Payload))
+
 		var v api.Message
 
-		if err := json.Unmarshal(msg.Data, &v); err != nil {
+		if err := json.Unmarshal(w.Payload, &v); err != nil {
 			panic(err)
 		}
 
 		switch v.Opcode {
 		case api.OpcodeOpen:
 			var openOp api.OpenOp
-			if err := json.Unmarshal(msg.Data, &openOp); err != nil {
+			if err := json.Unmarshal(w.Payload, &openOp); err != nil {
 				panic(err)
 			}
 			log.Println(openOp.ReadOnly)
@@ -43,14 +51,14 @@ func (c *Callback) GetServerCallback(cm networking.ConnectionManager, file *os.F
 						panic(err)
 					}
 
-					cm.Write(msg)
+					cm.WriteUnicast(msg, w.Mac)
 				} else {
 					msg, err := json.Marshal(api.NewOpenOpResponse(""))
 					if err != nil {
 						panic(err)
 					}
 
-					cm.Write(msg)
+					cm.WriteUnicast(msg, w.Mac)
 				}
 			} else {
 				file, err = os.OpenFile(myFile, os.O_CREATE|os.O_RDWR|os.O_APPEND, os.ModePerm)
@@ -60,21 +68,21 @@ func (c *Callback) GetServerCallback(cm networking.ConnectionManager, file *os.F
 						panic(err)
 					}
 
-					cm.Write(msg)
+					cm.WriteUnicast(msg, w.Mac)
 				} else {
 					msg, err := json.Marshal(api.NewOpenOpResponse(""))
 					if err != nil {
 						panic(err)
 					}
 
-					cm.Write(msg)
+					cm.WriteUnicast(msg, w.Mac)
 				}
 			}
 
 			break
 		case api.OpcodeClose:
 			var closeOp api.CloseOp
-			if err := json.Unmarshal(msg.Data, &closeOp); err != nil {
+			if err := json.Unmarshal(w.Payload, &closeOp); err != nil {
 				panic(err)
 			}
 
@@ -85,12 +93,12 @@ func (c *Callback) GetServerCallback(cm networking.ConnectionManager, file *os.F
 				panic(err)
 			}
 
-			cm.Write(msg)
+			cm.WriteUnicast(msg, w.Mac)
 
 			break
 		case api.OpcodeRead:
 			var readOp api.ReadOp
-			if err := json.Unmarshal(msg.Data, &readOp); err != nil {
+			if err := json.Unmarshal(w.Payload, &readOp); err != nil {
 				panic(err)
 			}
 
@@ -103,20 +111,20 @@ func (c *Callback) GetServerCallback(cm networking.ConnectionManager, file *os.F
 					panic(err)
 				}
 
-				cm.Write(msg)
+				cm.WriteUnicast(msg, w.Mac)
 			} else {
 				msg, err := json.Marshal(api.NewReadOpResponse(buf, int64(n), ""))
 				if err != nil {
 					panic(err)
 				}
 
-				cm.Write(msg)
+				cm.WriteUnicast(msg, w.Mac)
 			}
 
 			break
 		case api.OpcodeWrite:
 			var writeOp api.WriteOp
-			if err := json.Unmarshal(msg.Data, &writeOp); err != nil {
+			if err := json.Unmarshal(w.Payload, &writeOp); err != nil {
 				panic(err)
 			}
 
@@ -127,20 +135,20 @@ func (c *Callback) GetServerCallback(cm networking.ConnectionManager, file *os.F
 					panic(err)
 				}
 
-				cm.Write(msg)
+				cm.WriteUnicast(msg, w.Mac)
 			} else {
 				msg, err := json.Marshal(api.NewWriteOpResponse(int64(n), ""))
 				if err != nil {
 					panic(err)
 				}
 
-				cm.Write(msg)
+				cm.WriteUnicast(msg, w.Mac)
 			}
 
 			break
 		case api.OpcodeSeek:
 			var seekOp api.SeekOp
-			if err := json.Unmarshal(msg.Data, &seekOp); err != nil {
+			if err := json.Unmarshal(w.Payload, &seekOp); err != nil {
 				panic(err)
 			}
 
@@ -151,14 +159,14 @@ func (c *Callback) GetServerCallback(cm networking.ConnectionManager, file *os.F
 					panic(err)
 				}
 
-				cm.Write(msg)
+				cm.WriteUnicast(msg, w.Mac)
 			} else {
 				msg, err := json.Marshal(api.NewSeekOpResponse(offset, ""))
 				if err != nil {
 					panic(err)
 				}
 
-				cm.Write(msg)
+				cm.WriteUnicast(msg, w.Mac)
 			}
 
 			break
@@ -170,16 +178,24 @@ func (c *Callback) GetClientCallback(rmFile networking.RemoteFile) func(msg webr
 	return func(msg webrtc.DataChannelMessage) {
 		log.Println(string(msg.Data))
 
+		var w api.WrappedMessage
+
+		if err := json.Unmarshal(msg.Data, &w); err != nil {
+			panic(err)
+		}
+
+		log.Println(string(w.Payload))
+
 		var v api.Message
 
-		if err := json.Unmarshal(msg.Data, &v); err != nil {
+		if err := json.Unmarshal(w.Payload, &v); err != nil {
 			panic(err)
 		}
 
 		switch v.Opcode {
 		case api.OpcodeOpenResponse:
 			var openOpResponse api.OpenOpResponse
-			if err := json.Unmarshal(msg.Data, &openOpResponse); err != nil {
+			if err := json.Unmarshal(w.Payload, &openOpResponse); err != nil {
 				panic(err)
 			}
 
@@ -190,7 +206,7 @@ func (c *Callback) GetClientCallback(rmFile networking.RemoteFile) func(msg webr
 			break
 		case api.OpcodeCloseResponse:
 			var closeOpResponse api.CloseOpResponse
-			if err := json.Unmarshal(msg.Data, &closeOpResponse); err != nil {
+			if err := json.Unmarshal(w.Payload, &closeOpResponse); err != nil {
 				panic(err)
 			}
 
@@ -199,7 +215,7 @@ func (c *Callback) GetClientCallback(rmFile networking.RemoteFile) func(msg webr
 			break
 		case api.OpcodeReadResponse:
 			var readOpResponse api.ReadOpResponse
-			if err := json.Unmarshal(msg.Data, &readOpResponse); err != nil {
+			if err := json.Unmarshal(w.Payload, &readOpResponse); err != nil {
 				panic(err)
 			}
 
@@ -208,7 +224,7 @@ func (c *Callback) GetClientCallback(rmFile networking.RemoteFile) func(msg webr
 			break
 		case api.OpcodeWriteResponse:
 			var writeOpResponse api.WriteOpResponse
-			if err := json.Unmarshal(msg.Data, &writeOpResponse); err != nil {
+			if err := json.Unmarshal(w.Payload, &writeOpResponse); err != nil {
 				panic(err)
 			}
 
@@ -217,7 +233,7 @@ func (c *Callback) GetClientCallback(rmFile networking.RemoteFile) func(msg webr
 			break
 		case api.OpcodeSeekResponse:
 			var seekOpResponse api.SeekOpResponse
-			if err := json.Unmarshal(msg.Data, &seekOpResponse); err != nil {
+			if err := json.Unmarshal(w.Payload, &seekOpResponse); err != nil {
 				panic(err)
 			}
 

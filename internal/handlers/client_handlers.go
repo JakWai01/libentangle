@@ -6,6 +6,7 @@ import (
 	"log"
 	"sync"
 
+	apiDataChannels "github.com/alphahorizonio/libentangle/pkg/api/datachannels/v1"
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
 	"github.com/alphahorizonio/libentangle/pkg/config"
 	"github.com/pion/webrtc/v3"
@@ -281,9 +282,14 @@ func (m *ClientManager) getPeerConnection(mac string) (*webrtc.PeerConnection, e
 }
 
 func (m *ClientManager) SendMessage(msg []byte) error {
+	wrappedMsg, err := json.Marshal(apiDataChannels.WrappedMessage{Mac: m.mac, Payload: msg})
+	if err != nil {
+		panic(err)
+	}
+
 	for key := range m.peers {
 		if key != m.mac {
-			if err := m.peers[key].channel.Send(msg); err != nil {
+			if err := m.peers[key].channel.Send(wrappedMsg); err != nil {
 				return nil
 			} else {
 				return err
@@ -294,7 +300,12 @@ func (m *ClientManager) SendMessage(msg []byte) error {
 }
 
 func (m *ClientManager) SendMessageUnicast(msg []byte, mac string) error {
-	if err := m.peers[mac].channel.Send(msg); err != nil {
+	wrappedMsg, err := json.Marshal(apiDataChannels.WrappedMessage{Mac: m.mac, Payload: msg})
+	if err != nil {
+		panic(err)
+	}
+
+	if err := m.peers[mac].channel.Send(wrappedMsg); err != nil {
 		return nil
 	} else {
 		return err

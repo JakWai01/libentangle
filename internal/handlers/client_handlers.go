@@ -8,7 +8,6 @@ import (
 
 	apiDataChannels "github.com/alphahorizonio/libentangle/pkg/api/datachannels/v1"
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
-	"github.com/alphahorizonio/libentangle/pkg/config"
 	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
@@ -196,7 +195,6 @@ func (m *ClientManager) HandleCandidate(data []byte, candidates *chan string) er
 }
 
 func (m *ClientManager) HandleResignation() error {
-	config.ExitClient <- struct{}{}
 	return nil
 }
 

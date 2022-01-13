@@ -71,7 +71,7 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, f fun
 				panic(err)
 			}
 
-			return
+			os.Exit(0)
 		}()
 
 	}()

@@ -75,7 +75,7 @@ require (
 	github.com/pion/transport v0.13.0 // indirect
 	github.com/pion/turn/v2 v2.0.6 // indirect
 	github.com/pion/udp v0.1.1 // indirect
-	github.com/pojntfx/stfs v0.0.0-20220113181140-525c76da7e19
+	github.com/pojntfx/stfs v0.0.0-20220114203619-4a3c5d981eac
 	github.com/spf13/afero v1.8.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

@@ -556,6 +556,8 @@ github.com/pojntfx/stfs v0.0.0-20220109224304-abd9d5443570 h1:BgQVPje3O1qWE/crmu
 github.com/pojntfx/stfs v0.0.0-20220109224304-abd9d5443570/go.mod h1:/4zCkcsXeFTZR3vZ4zqXceV74FXIbVq1l9rJxECQwT8=
 github.com/pojntfx/stfs v0.0.0-20220113181140-525c76da7e19 h1:5R2WL48YxdLp0G0aVL51OKj6KOonmQnskkxGJ7LXdnY=
 github.com/pojntfx/stfs v0.0.0-20220113181140-525c76da7e19/go.mod h1:/4zCkcsXeFTZR3vZ4zqXceV74FXIbVq1l9rJxECQwT8=
+github.com/pojntfx/stfs v0.0.0-20220114203619-4a3c5d981eac h1:2PTeJ6YWFjxMY52B78r5abd58EhRidNDsWqTOo5lrNY=
+github.com/pojntfx/stfs v0.0.0-20220114203619-4a3c5d981eac/go.mod h1:/4zCkcsXeFTZR3vZ4zqXceV74FXIbVq1l9rJxECQwT8=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/posener/complete v1.2.3/go.mod h1:WZIdtGGp+qx0sLrYKtIRAruyNpv6hFCicSgv7Sy7s/s=
 github.com/prometheus/client_golang v0.9.1/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=

@@ -8,7 +8,6 @@ import (
 
 	"github.com/JakWai01/sile-fystem/pkg/filesystem"
 	"github.com/JakWai01/sile-fystem/pkg/helpers"
-	"github.com/alphahorizonio/libentangle/internal/handlers"
 	"github.com/alphahorizonio/libentangle/internal/logging"
 	"github.com/jacobsa/fuse"
 	"github.com/pojntfx/stfs/pkg/cache"
@@ -21,6 +20,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
 	"github.com/alphahorizonio/libentangle/pkg/callbacks"
+	"github.com/alphahorizonio/libentangle/pkg/handlers"
 	"github.com/alphahorizonio/libentangle/pkg/networking"
 )
 

@@ -3,7 +3,7 @@ package networking
 import (
 	"sync"
 
-	"github.com/alphahorizonio/libentangle/internal/handlers"
+	"github.com/alphahorizonio/libentangle/pkg/handlers"
 	"github.com/alphahorizonio/libentangle/pkg/signaling"
 	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"

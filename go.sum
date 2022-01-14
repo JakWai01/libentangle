@@ -65,6 +65,10 @@ github.com/JakWai01/sile-fystem v0.0.0-20220109122210-6ea23e472730 h1:lpRfNSlum4
 github.com/JakWai01/sile-fystem v0.0.0-20220109122210-6ea23e472730/go.mod h1:XYqpoP3yLBU99iHOtRK1GSs9M22aozMEHnwkWORGFew=
 github.com/JakWai01/sile-fystem v0.0.0-20220113212533-11b3630878c3 h1:iytEuKqSN3WQ9viM3aafOQz+qfhcjQgakRr8kzheuGk=
 github.com/JakWai01/sile-fystem v0.0.0-20220113212533-11b3630878c3/go.mod h1:XYqpoP3yLBU99iHOtRK1GSs9M22aozMEHnwkWORGFew=
+github.com/JakWai01/sile-fystem v0.0.0-20220114192548-8a762fcc1d48 h1:jerT5qMnFjd0T+eqQnOd3imDVvHAcs3OXYl98rZWeuY=
+github.com/JakWai01/sile-fystem v0.0.0-20220114192548-8a762fcc1d48/go.mod h1:XYqpoP3yLBU99iHOtRK1GSs9M22aozMEHnwkWORGFew=
+github.com/JakWai01/sile-fystem v0.0.0-20220114195711-cab6bb484bec h1:x2LgKUpmDZDeGJe/+deBxRLXs22xvzk3cf4VWdX6M3w=
+github.com/JakWai01/sile-fystem v0.0.0-20220114195711-cab6bb484bec/go.mod h1:g60cKfo6UloCu2NMZlCcKVZLPDysia+Uw6CSfkF4CVU=
 github.com/Masterminds/goutils v1.1.0/go.mod h1:8cTjp+g8YejhMuvIA5y2vz3BpJxksy863GQaJW2MFNU=
 github.com/Masterminds/semver v1.5.0/go.mod h1:MB6lktGJrhw8PrUyiEoblNEGEQ+RzHPF078ddwwvV3Y=
 github.com/Masterminds/sprig v2.22.0+incompatible/go.mod h1:y6hNFY5UBTIWBxnzTeuNhlNS5hqE0NB0E6fgfo2Br3o=
@@ -929,6 +933,8 @@ golang.org/x/sys v0.0.0-20220110181412-a018aaa089fe h1:W8vbETX/n8S6EmY0Pu4Ix7Vvp
 golang.org/x/sys v0.0.0-20220110181412-a018aaa089fe/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220111092808-5a964db01320 h1:0jf+tOCoZ3LyutmCOWpVni1chK4VfFLhRsDK7MhqGRY=
 golang.org/x/sys v0.0.0-20220111092808-5a964db01320/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 h1:XfKQ4OlFl8okEOr5UvAqFRVj8pY/4yfcXrddB8qAbU0=
+golang.org/x/sys v0.0.0-20220114195835-da31bd327af9/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201117132131-f5c789dd3221/go.mod h1:Nr5EML6q2oocZ2LXRh80K7BxOlk5/8JxuGnuhpl+muw=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=

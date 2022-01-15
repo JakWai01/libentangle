@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 
 	api "github.com/alphahorizonio/libentangle/pkg/api/websockets/v1"
 	"github.com/alphahorizonio/libentangle/pkg/handlers"
@@ -18,7 +19,14 @@ var signalCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		for {
-			addr, err := net.ResolveTCPAddr("tcp", "localhost:9090")
+			port := os.Getenv("PORT")
+			if port == "" {
+				port = "9090"
+			}
+
+			socket := "0.0.0.0:" + port
+
+			addr, err := net.ResolveTCPAddr("tcp", socket)
 			if err != nil {
 				panic(err)
 			}

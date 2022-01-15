@@ -19,16 +19,21 @@ require (
 	github.com/cosnicolaou/pbzip2 v1.0.1 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/friendsofgo/errors v0.9.2 // indirect
+	github.com/gin-gonic/gin v1.7.7 // indirect
+	github.com/go-playground/validator/v10 v10.10.0 // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/jacobsa/syncutil v0.0.0-20180201203307-228ac8e5a6c3 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
+	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattetti/filebuffer v1.0.1 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v1.14.10 // indirect
 	github.com/pierrec/lz4/v4 v4.1.12 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
+	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	github.com/rubenv/sql-migrate v1.0.0 // indirect
+	github.com/ugorji/go/codec v1.2.6 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	github.com/volatiletech/null/v8 v8.1.2 // indirect
 	github.com/volatiletech/randomize v0.0.1 // indirect
@@ -36,7 +41,7 @@ require (
 	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/tools v0.1.8 // indirect
 	gopkg.in/gorp.v1 v1.7.2 // indirect
-	lukechampine.com/uint128 v1.1.1 // indirect
+	lukechampine.com/uint128 v1.2.0 // indirect
 	modernc.org/cc/v3 v3.35.22 // indirect
 	modernc.org/ccgo/v3 v3.14.0 // indirect
 	modernc.org/libc v1.13.2 // indirect
@@ -49,7 +54,7 @@ require (
 )
 
 require (
-	github.com/JakWai01/sile-fystem v0.0.0-20220114195711-cab6bb484bec
+	github.com/JakWai01/sile-fystem v0.0.0-20220115111213-3008e07bd431
 	github.com/fclairamb/go-log v0.2.0
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

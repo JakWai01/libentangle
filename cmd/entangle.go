@@ -46,16 +46,16 @@ var entangleCmd = &cobra.Command{
 		if viper.GetBool(serverFlag) {
 			var file *os.File
 
-			dir, err := os.MkdirTemp(os.TempDir(), "serverfiles-*")
-			if err != nil {
-				panic(err)
-			}
+			// dir, err := os.MkdirTemp(os.TempDir(), "serverfiles-*")
+			// if err != nil {
+			// 	panic(err)
+			// }
 
-			myFile := filepath.Join(dir, "serverfile.tar")
+			// myFile := filepath.Join(dir, "serverfile.tar")
 
 			callback := callbacks.NewCallback()
 
-			cm.Connect("test", callback.GetServerCallback(*cm, file, myFile))
+			cm.Connect("test", callback.GetServerCallback(*cm, file, "/home/jakobwaibel/Documents/test.tar"))
 
 			<-onOpen
 

@@ -10,7 +10,12 @@ import (
 	"github.com/alphahorizonio/libentangle/pkg/handlers"
 	"github.com/alphahorizonio/libentangle/pkg/signaling"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"nhooyr.io/websocket"
+)
+
+const (
+	addressKey = "address"
 )
 
 var signalCmd = &cobra.Command{
@@ -24,7 +29,7 @@ var signalCmd = &cobra.Command{
 				port = "9090"
 			}
 
-			socket := "0.0.0.0:" + port
+			socket := viper.GetString(addressKey) + ":" + port
 
 			addr, err := net.ResolveTCPAddr("tcp", socket)
 			if err != nil {
@@ -77,5 +82,11 @@ var signalCmd = &cobra.Command{
 }
 
 func init() {
+	signalCmd.PersistentFlags().String(addressKey, "0.0.0.0", "Listen address")
+
+	if err := viper.BindPFlags(signalCmd.PersistentFlags()); err != nil {
+		log.Fatal("could not bind flags:", err)
+	}
+
 	rootCmd.AddCommand(signalCmd)
 }

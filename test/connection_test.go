@@ -75,13 +75,13 @@ func TestConnection(t *testing.T) {
 
 	callback := callbacks.NewCallback()
 
-	go connectionManager.Connect("test", callback.GetServerCallback(*connectionManager, file, "path/to/file.tar"))
+	go connectionManager.Connect("localhost:9090", "test", callback.GetServerCallback(*connectionManager, file, "path/to/file.tar"))
 
 	time.Sleep(time.Second)
 
 	rmFile := networking.NewRemoteFile(*connectionManager)
 
-	go connectionManager.Connect("test", callback.GetClientCallback(*rmFile))
+	go connectionManager.Connect("localhost:9090", "test", callback.GetClientCallback(*rmFile))
 
 	<-onOpen
 }

@@ -25,7 +25,6 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() error {
-
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return err

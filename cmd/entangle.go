@@ -216,7 +216,6 @@ func init() {
 	if err := viper.BindPFlags(entangleCmd.PersistentFlags()); err != nil {
 		log.Fatal("could not bind flags:", err)
 	}
-	viper.SetEnvPrefix("entangle")
 	viper.AutomaticEnv()
 
 	rootCmd.AddCommand(entangleCmd)

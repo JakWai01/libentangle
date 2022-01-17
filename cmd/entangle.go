@@ -13,6 +13,7 @@ import (
 	"github.com/pojntfx/stfs/pkg/cache"
 	"github.com/pojntfx/stfs/pkg/config"
 	"github.com/pojntfx/stfs/pkg/fs"
+	"github.com/pojntfx/stfs/pkg/mtio"
 	"github.com/pojntfx/stfs/pkg/operations"
 	"github.com/pojntfx/stfs/pkg/persisters"
 	"github.com/spf13/cobra"
@@ -68,6 +69,8 @@ var entangleCmd = &cobra.Command{
 
 			<-onOpen
 
+			mt := mtio.MagneticTapeIO{}
+
 			metadataPersister := persisters.NewMetadataPersister(viper.GetString(metadataFlag))
 			if err := metadataPersister.Open(); err != nil {
 				panic(err)
@@ -107,17 +110,7 @@ var entangleCmd = &cobra.Command{
 				},
 				CloseReader: rmFile.Close,
 
-				GetDrive: func() (config.DriveConfig, error) {
-					if err := rmFile.Open(true); err != nil {
-						return config.DriveConfig{}, err
-					}
-
-					return config.DriveConfig{
-						DriveIsRegular: true,
-						Drive:          rmFile,
-					}, nil
-				},
-				CloseDrive: rmFile.Close,
+				MagneticTapeIO: mt,
 			}
 			readCryptoConfig := config.CryptoConfig{}
 

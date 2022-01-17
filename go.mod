@@ -44,8 +44,8 @@ require (
 	gopkg.in/gorp.v1 v1.7.2 // indirect
 	lukechampine.com/uint128 v1.2.0 // indirect
 	modernc.org/cc/v3 v3.35.22 // indirect
-	modernc.org/ccgo/v3 v3.14.0 // indirect
-	modernc.org/libc v1.13.2 // indirect
+	modernc.org/ccgo/v3 v3.15.1 // indirect
+	modernc.org/libc v1.14.1 // indirect
 	modernc.org/mathutil v1.4.1 // indirect
 	modernc.org/memory v1.0.5 // indirect
 	modernc.org/opt v0.1.1 // indirect
@@ -55,7 +55,7 @@ require (
 )
 
 require (
-	github.com/JakWai01/sile-fystem v0.0.0-20220115111213-3008e07bd431
+	github.com/JakWai01/sile-fystem v0.0.0-20220116194159-11de7528c6f2
 	github.com/fclairamb/go-log v0.2.0
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -81,7 +81,7 @@ require (
 	github.com/pion/transport v0.13.0 // indirect
 	github.com/pion/turn/v2 v2.0.6 // indirect
 	github.com/pion/udp v0.1.1 // indirect
-	github.com/pojntfx/stfs v0.0.0-20220114203619-4a3c5d981eac
+	github.com/pojntfx/stfs v0.0.0-20220116225047-25cacd34d89f
 	github.com/spf13/afero v1.8.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

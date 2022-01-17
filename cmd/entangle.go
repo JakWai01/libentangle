@@ -29,6 +29,8 @@ const (
 	recordSizeFlag = "recordSize"
 	writeCacheFlag = "writeCache"
 	serverFlag     = "server"
+	signalFlag     = "signal"
+	driveFlag      = "drive"
 )
 
 var entangleCmd = &cobra.Command{
@@ -46,16 +48,9 @@ var entangleCmd = &cobra.Command{
 		if viper.GetBool(serverFlag) {
 			var file *os.File
 
-			// dir, err := os.MkdirTemp(os.TempDir(), "serverfiles-*")
-			// if err != nil {
-			// 	panic(err)
-			// }
-
-			// myFile := filepath.Join(dir, "serverfile.tar")
-
 			callback := callbacks.NewCallback()
 
-			cm.Connect("test", callback.GetServerCallback(*cm, file, "/home/jakobwaibel/Documents/test.tar"))
+			cm.Connect(viper.GetString(signalFlag), viper.GetString(communityKey), callback.GetServerCallback(*cm, file, viper.GetString(driveFlag)))
 
 			<-onOpen
 
@@ -69,7 +64,7 @@ var entangleCmd = &cobra.Command{
 
 			callback := callbacks.NewCallback()
 
-			go cm.Connect("test", callback.GetClientCallback(*rmFile))
+			go cm.Connect(viper.GetString(signalFlag), viper.GetString(communityKey), callback.GetClientCallback(*rmFile))
 
 			<-onOpen
 
@@ -204,15 +199,24 @@ var entangleCmd = &cobra.Command{
 }
 
 func init() {
+	dir, err := os.MkdirTemp(os.TempDir(), "serverfiles-*")
+	if err != nil {
+		panic(err)
+	}
+
+	defaultDrive := filepath.Join(dir, "serverfile.tar")
+
 	entangleCmd.PersistentFlags().String(mountpointFlag, "/tmp/mount", "Mountpoint to use for FUSE")
 	entangleCmd.PersistentFlags().Int(recordSizeFlag, 20, "Amount of 512-bit blocks per second")
 	entangleCmd.PersistentFlags().String(writeCacheFlag, filepath.Join(os.TempDir(), "stfs-write-cache"), "Directory to use for write cache")
 	entangleCmd.PersistentFlags().Bool(serverFlag, false, "Set true to run as server")
+	entangleCmd.PersistentFlags().String(signalFlag, "localhost:9090", "Specify address of signaling service")
+	entangleCmd.PersistentFlags().String(driveFlag, defaultDrive, "Specify drive")
 
 	if err := viper.BindPFlags(entangleCmd.PersistentFlags()); err != nil {
 		log.Fatal("could not bind flags:", err)
 	}
-	viper.SetEnvPrefix("sile-fystem")
+	viper.SetEnvPrefix("entangle")
 	viper.AutomaticEnv()
 
 	rootCmd.AddCommand(entangleCmd)

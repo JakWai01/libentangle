@@ -19,7 +19,7 @@ func NewConnectionManager(manager *handlers.ClientManager) *ConnectionManager {
 	}
 }
 
-func (m *ConnectionManager) Connect(community string, f func(msg webrtc.DataChannelMessage)) {
+func (m *ConnectionManager) Connect(signaler string, community string, f func(msg webrtc.DataChannelMessage)) {
 	client := signaling.NewSignalingClient(
 		func(conn *websocket.Conn, uuid string) error {
 			return m.manager.HandleAcceptance(conn, uuid)
@@ -42,7 +42,7 @@ func (m *ConnectionManager) Connect(community string, f func(msg webrtc.DataChan
 	)
 
 	go func() {
-		go client.HandleConn("localhost:9090", community, f)
+		go client.HandleConn(signaler, community, f)
 	}()
 }
 

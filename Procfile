@@ -1,1 +1,1 @@
-web: entangle signal
+web: libentangle signal

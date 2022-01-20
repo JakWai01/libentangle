@@ -3,6 +3,7 @@ package signaling
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"os"
 	"os/signal"
 	"sync"
@@ -49,7 +50,8 @@ func (s *SignalingClient) HandleConn(laddrKey string, communityKey string, f fun
 	wsAddress := "ws://" + laddrKey
 	conn, _, error := websocket.Dial(context.Background(), wsAddress, nil)
 	if error != nil {
-		panic(error)
+		log.Printf("Signaling server could not be reached on: %v", wsAddress)
+		os.Exit(0)
 	}
 	defer conn.Close(websocket.StatusNormalClosure, "Closing websocket connection nominally")
 

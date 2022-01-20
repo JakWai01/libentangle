@@ -5,7 +5,7 @@ go 1.17
 
 require (
 	github.com/google/uuid v1.3.0
-	github.com/pion/webrtc/v3 v3.1.15
+	github.com/pion/webrtc/v3 v3.1.17
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
 	github.com/volatiletech/sqlboiler/v4 v4.8.3
@@ -44,18 +44,18 @@ require (
 	gopkg.in/gorp.v1 v1.7.2 // indirect
 	lukechampine.com/uint128 v1.2.0 // indirect
 	modernc.org/cc/v3 v3.35.22 // indirect
-	modernc.org/ccgo/v3 v3.15.1 // indirect
-	modernc.org/libc v1.14.1 // indirect
+	modernc.org/ccgo/v3 v3.15.11 // indirect
+	modernc.org/libc v1.14.3 // indirect
 	modernc.org/mathutil v1.4.1 // indirect
 	modernc.org/memory v1.0.5 // indirect
 	modernc.org/opt v0.1.1 // indirect
-	modernc.org/sqlite v1.14.4 // indirect
+	modernc.org/sqlite v1.14.5 // indirect
 	modernc.org/strutil v1.1.1 // indirect
 	modernc.org/token v1.0.0 // indirect
 )
 
 require (
-	github.com/JakWai01/sile-fystem v0.0.0-20220116194159-11de7528c6f2
+	github.com/JakWai01/sile-fystem v0.1.4-alpha
 	github.com/fclairamb/go-log v0.2.0
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -68,7 +68,7 @@ require (
 	github.com/pion/datachannel v1.5.2 // indirect
 	github.com/pion/dtls/v2 v2.1.0 // indirect
 	github.com/pion/ice/v2 v2.1.18 // indirect
-	github.com/pion/interceptor v0.1.5 // indirect
+	github.com/pion/interceptor v0.1.6 // indirect
 	github.com/pion/logging v0.2.2 // indirect
 	github.com/pion/mdns v0.0.5 // indirect
 	github.com/pion/randutil v0.1.0 // indirect
@@ -81,7 +81,7 @@ require (
 	github.com/pion/transport v0.13.0 // indirect
 	github.com/pion/turn/v2 v2.0.6 // indirect
 	github.com/pion/udp v0.1.1 // indirect
-	github.com/pojntfx/stfs v0.0.0-20220116225047-25cacd34d89f
+	github.com/pojntfx/stfs v0.0.0-20220119164156-16765c5fcc89
 	github.com/spf13/afero v1.8.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
@@ -92,6 +92,6 @@ require (
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
-	gopkg.in/ini.v1 v1.66.2 // indirect
+	gopkg.in/ini.v1 v1.66.3 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

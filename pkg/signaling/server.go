@@ -45,7 +45,7 @@ func (s *SignalingServer) HandleConn(conn websocket.Conn) {
 		for {
 			_, data, err := conn.Read(context.Background())
 			if err != nil {
-				panic(err)
+				continue
 			}
 
 			var v api.Message

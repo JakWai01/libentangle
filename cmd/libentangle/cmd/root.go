@@ -18,7 +18,7 @@ const (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "entangle",
+	Use:   "libentangle",
 	Short: "A library for building peer-to-peer file sharing solutions.",
 	Long: `A library for building peer-to-peer file sharing solutions.
 	For more information, please visit https://github.com/alphahorizon/libentangle`,

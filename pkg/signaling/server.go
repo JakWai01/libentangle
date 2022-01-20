@@ -50,7 +50,7 @@ func (s *SignalingServer) HandleConn(conn websocket.Conn) {
 
 			var v api.Message
 			if err := json.Unmarshal(data, &v); err != nil {
-				panic(err)
+				continue
 			}
 
 			log.Println(v)
@@ -59,42 +59,42 @@ func (s *SignalingServer) HandleConn(conn websocket.Conn) {
 			case api.OpcodeApplication:
 				var application api.Application
 				if err := json.Unmarshal(data, &application); err != nil {
-					panic(err)
+					continue
 				}
 				s.onApplication(application, &conn)
 				break
 			case api.OpcodeReady:
 				var ready api.Ready
 				if err := json.Unmarshal(data, &ready); err != nil {
-					panic(err)
+					continue
 				}
 				s.onReady(ready, &conn)
 				break
 			case api.OpcodeOffer:
 				var offer api.Offer
 				if err := json.Unmarshal(data, &offer); err != nil {
-					panic(err)
+					continue
 				}
 				s.onOffer(offer)
 				break
 			case api.OpcodeAnswer:
 				var answer api.Answer
 				if err := json.Unmarshal(data, &answer); err != nil {
-					panic(err)
+					continue
 				}
 				s.onAnswer(answer)
 				break
 			case api.OpcodeCandidate:
 				var candidate api.Candidate
 				if err := json.Unmarshal(data, &candidate); err != nil {
-					panic(err)
+					continue
 				}
 				s.onCandidate(candidate)
 				break
 			case api.OpcodeExited:
 				var exited api.Exited
 				if err := json.Unmarshal(data, &exited); err != nil {
-					panic(err)
+					continue
 				}
 				s.onExited(exited)
 				break loop
